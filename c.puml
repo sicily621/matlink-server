@@ -1,0 +1,61 @@
+@startuml
+' 组织架构模块
+class Department {
+  - Long id
+  - String name
+  - Long parentId
+  - Long managerId
+}
+
+class Employee {
+  - Long id
+  - String code
+  - String username
+  - String password
+  - String realName
+  - Long departmentId
+  - Long roleId
+  - Integer gender
+  - String position
+  - String phone
+  - String email
+  - Integer status
+}
+
+' 权限管理模块
+class Permission {
+  - Long id
+  - String name
+  - String moduleCode
+  - Long parentId
+  - String url
+  - String description
+  - Integer action
+  - Integer type
+}
+
+class Role {
+  - Long id
+  - String name
+  - String code
+  - String description
+  - Integer status
+}
+
+class RolePermission {
+  - Long id
+  - Long roleId
+  - Long permissionId
+}
+
+' 组织架构关系
+Department o-- Department : 父子部门
+Department --> Employee : 部门经理
+Employee --> Department : 所属部门
+
+' 权限管理关系
+Permission o-- Permission : 权限层级
+RolePermission --> Role : 角色关联
+RolePermission --> Permission : 权限关联
+Employee --> Role : 拥有角色
+@enduml

@@ -1,0 +1,99 @@
+@startuml
+' 设置样式
+skinparam defaultTextAlignment center
+skinparam ClassAttributeIconSize 0
+
+' 定义类
+class Account {
+    - id: Long
+    - orderId: Long
+    - type: Integer
+    - relatedEntityType: Integer
+    - relatedEntityId: Long
+    - amount: BigDecimal
+    - paymentMethod: Integer
+    + generateTransactionNo()
+}
+
+class PurchaseOrder {
+    - id: Long
+    - demandId: Long
+    - code: String
+    - employeeId: Long
+    - expectedDate: Date
+    - actualDate: Date
+    - status: Integer
+    - totalAmount: BigDecimal
+    + generateOrderCode()
+}
+
+class SalesOrder {
+    - id: Long
+    - code: String
+    - customerId: Long
+    - employeeId: Long
+    - expectedDate: Date
+    - actualDate: Date
+    - status: Integer
+    - finalAmount: BigDecimal
+    + calculateTax()
+}
+
+class PurchaseReturn {
+    - id: Long
+    - code: String
+    - orderId: Long
+    - employeeId: Long
+    - status: Integer
+    - totalAmount: BigDecimal
+    + validateReturnQuantity()
+}
+
+class SalesReturn {
+    - id: Long
+    - code: String
+    - orderId: Long
+    - employeeId: Long
+    - status: Integer
+    - customerId: Long
+    - totalAmount: BigDecimal
+    + processRefund()
+}
+
+class Warehouse {
+    - id: Long
+    - name: String
+    - code: String
+    - area: BigDecimal
+    - managerId: Long
+}
+
+class WarehouseArea {
+    - id: Long
+    - warehouseId: Long
+    - name: String
+    - type: Integer
+}
+
+class Shelf {
+    - id: Long
+    - areaId: Long
+    - code: String
+    - capacity: BigDecimal
+}
+
+' 组合关系：实心菱形
+Account "1" -->"1" PurchaseOrder : 生成订单
+Account "1" --> "1" PurchaseReturn : 生成订单
+Account "1" --> "1" SalesOrder : 生成订单
+Account "1" --> "1" SalesReturn : 生成订单
+PurchaseOrder "1" *-- "0..1" PurchaseReturn : 包含退单
+SalesOrder "1" *-- "0..1" SalesReturn : 包含退单
+PurchaseOrder "1" -- "1 " Warehouse : 入库
+PurchaseReturn "1" -- "1  " Warehouse : 出库
+SalesOrder "1" -- "1" Warehouse : 出库
+SalesReturn "1" -- "1" Warehouse : 入库
+Warehouse "1" *-- "n" WarehouseArea : 拥有区域
+WarehouseArea "1" *-- "n" Shelf : 拥有货架
+
+@enduml

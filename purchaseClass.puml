@@ -1,0 +1,115 @@
+@startuml
+' 设置字体和样式
+skinparam defaultTextAlignment center
+skinparam ClassAttributeIconSize 0
+
+' 定义类
+class Employee {
+    - id: Long
+    - code: String
+    - username: String
+    - realName: String
+    - departmentId: Long
+    - roleId: Long
+    - position: String
+    - phone: String
+}
+
+class PurchaseDemand {
+    - id: Long
+    - departmentId: Long
+    - applicantId: Long
+    - expectedArrivalDate: Date
+    - description: String
+    - status: Integer
+    - approverId: Long
+    - approvalTime: Date
+}
+
+class PurchaseOrder {
+    - id: Long
+    - demandId: Long
+    - code: String
+    - employeeId: Long
+    - expectedDate: Date
+    - actualDate: Date
+    - status: Integer
+    - totalAmount: BigDecimal
+    - description: String
+    - approverId: Long
+    - approvalTime: Date
+}
+
+class PurchaseReturn {
+    - id: Long
+    - code: String
+    - orderId: Long
+    - employeeId: Long
+    - status: Integer
+    - description: String
+    - totalAmount: BigDecimal
+    - approverId: Long
+    - approvalTime: Date
+    - receipt: Integer
+}
+
+class PurchaseDemandDetail {
+    - id: Long
+    - demandId: Long
+    - productId: Long
+    - quantity: BigDecimal
+}
+
+class PurchaseOrderDetail {
+    - id: Long
+    - orderId: Long
+    - supplierId: Long
+    - productId: Long
+    - quantity: BigDecimal
+    - price: BigDecimal
+    - amount: BigDecimal
+}
+
+class PurchaseReturnDetail {
+    - id: Long
+    - returnId: Long
+    - productId: Long
+    - quantity: BigDecimal
+    - price: BigDecimal
+    - amount: BigDecimal
+}
+
+class Supplier {
+    - id: Long
+    - code: String
+    - name: String
+    - contactPerson: String
+    - phone: String
+    - address: String
+}
+
+class Product {
+    - id: Long
+    - code: String
+    - name: String
+    - categoryId: Long
+    - purchasePrice: BigDecimal
+}
+
+' 关联关系
+Employee "1" --> "n" PurchaseDemand : 创建需求
+Employee "1" --> "n" PurchaseOrder : 创建订单
+Employee "1" --> "n" PurchaseReturn : 处理退单
+
+PurchaseDemand "1 " *-- "n" PurchaseDemandDetail : 包含明细
+PurchaseDemandDetail "n" --> "1  " Product : 引用商品
+
+PurchaseOrder "1 " *-- "n" PurchaseOrderDetail : 包含明细
+PurchaseOrderDetail "n" --> "1" Supplier : 供应方
+PurchaseOrderDetail "n" --> "1" Product : 采购商品
+
+PurchaseOrder "1" *-- "0..1" PurchaseReturn : 产生
+PurchaseReturn "1" *-- "n" PurchaseReturnDetail : 包含明细
+PurchaseReturnDetail "n" --> "1" Product : 退回商品
+
+@enduml

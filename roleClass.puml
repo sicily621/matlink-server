@@ -1,0 +1,72 @@
+@startuml
+skinparam defaultTextAlignment center
+skinparam ClassAttributeIconSize 0
+
+class Department {
+    - Long id
+    - String name
+    - Long parentId
+    - Long managerId
+}
+
+class Employee {
+    - Long id
+    - String code
+    - String username
+    - String password
+    - String realName
+    - Long departmentId
+    - Long roleId
+    - Integer gender
+    - String avatar
+    - String position
+    - String phone
+    - String email
+    - Integer status
+}
+
+class Role {
+    - Long id
+    - String name
+    - String code
+    - String description
+    - Integer status
+}
+
+class Permission {
+    - Long id
+    - String name
+    - String moduleCode
+    - Long parentId
+    - String url
+    - String description
+    - Integer action
+    - Integer type
+}
+
+class RolePermission {
+    - Long id
+    - Long roleId
+    - Long permissionId
+}
+
+' ==================== 关系定义 ====================
+
+' Department 自引用：组合（父子部门）
+Department "1" o-- "0..*" Department : 父子部门
+
+' Department 与 Employee：所属部门
+Department "1" -- "0..*" Employee : 包含员工
+
+' Employee 与 Role：多对一（一个员工一个角色）
+Employee "n" --> "1" Role : 拥有角色
+
+
+' Role 与 Permission：通过中间表建立多对多
+Role "1" -- "n" RolePermission : 包含
+Permission "1" -- "n" RolePermission : 被包含
+
+' Permission 自引用：聚合（权限层级）
+Permission "1" *-- "0..*" Permission : 父权限
+
+@enduml

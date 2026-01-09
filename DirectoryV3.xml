@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+ <trees>
+     <tree path="/src/main/java/com/hg/inventory" title="" extension="" presentableText="" tooltipTitle="" icon=""
+           textColor="" backgroundColor=""/>
+     <tree path="/src/main/java/com/hg/inventory/common/doc" title="接口文档"/>
+     <tree path="/pom.xml" title="依赖包配置"/>
+     <tree path="/src/main/resources" title="配置"/>
+     <tree path="/src/main/resources/application.yaml" title="配置文件"/>
+ </trees>

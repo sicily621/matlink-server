@@ -1,0 +1,141 @@
+@startuml
+' 设置字体和样式
+skinparam defaultTextAlignment center
+skinparam ClassAttributeIconSize 0
+skinparam ArrowFontSize 12
+
+' 定义类
+class Employee {
+    - Long id
+    - String code
+    - String username
+    - String password
+    - String realName
+    - Long departmentId
+    - Long roleId
+    - Integer gender
+    - String position
+    - String phone
+    - String email
+    - Integer status
+    - DateTime createTime
+    - DateTime updateTime
+    - Integer delFlag
+}
+
+class Customer {
+    - Long id
+    - String name
+    - String phone
+    - String address
+    - String email
+    - Integer creditLevel
+    - DateTime createTime
+    - DateTime updateTime
+    - String contactPerson
+    - Integer delFlag
+}
+
+class Product {
+    - Long id
+    - String code
+    - String name
+    - Long categoryId
+    - Decimal purchasePrice
+    - Decimal retailPrice
+    - String specification
+    - String unit
+    - String brand
+    - String barcode
+    - DateTime createTime
+    - DateTime updateTime
+    - Integer delFlag
+}
+
+class SalesOrder {
+    - Long id
+    - String code
+    - Long customerId
+    - Long employeeId
+    - DateTime expectedDate
+    - DateTime actualDate
+    - Integer status
+    - Decimal totalAmount
+    - Decimal discount
+    - Decimal tax
+    - Decimal finalAmount
+    - String description
+    - Long approverId
+    - DateTime approvalTime
+    - DateTime createTime
+    - DateTime updateTime
+    - Integer delFlag
+}
+
+class SalesOrderDetail {
+    - Long id
+    - Long orderId
+    - Long productId
+    - Decimal quantity
+    - Decimal cost
+    - Decimal price
+    - Decimal amount
+    - DateTime createTime
+    - DateTime updateTime
+    - Integer delFlag
+}
+
+class SalesReturn {
+    - Long id
+    - String code
+    - Long orderId
+    - Long employeeId
+    - Long customerId
+    - Integer status
+    - String description
+    - Decimal totalAmount
+    - Long approverId
+    - DateTime approvalTime
+    - DateTime createTime
+    - DateTime updateTime
+    - Integer delFlag
+}
+
+class SalesReturnDetail {
+    - Long id
+    - Long returnId
+    - Long productId
+    - Decimal quantity
+    - Decimal cost
+    - Decimal price
+    - Decimal amount
+    - DateTime createTime
+    - DateTime updateTime
+    - Integer delFlag
+}
+
+' 关系定义
+
+' Employee 与 SalesOrder: 一个员工可以有多个销售订单
+Employee "1" --> "n" SalesOrder : 创建
+
+' Customer 与 SalesOrder: 一个客户可以有多个销售订单
+Customer "1 " <-- "n" SalesOrder : 关联
+
+' SalesOrder 与 SalesOrderDetail: 组合关系（订单包含详情）
+SalesOrder "1" *-- "n " SalesOrderDetail : 包含
+
+
+' Product 与 SalesOrderDetail: 一个商品可出现在多个订单详情中
+Product "1  " <-- "n" SalesOrderDetail : 关联
+
+' SalesOrder 与 SalesReturn: 一个订单产生一个退货单
+SalesOrder "1 " *-- "0..1" SalesReturn : 包含并管理
+
+' SalesReturn 与 SalesReturnDetail: 组合关系（退货单包含详情）
+SalesReturn "1" *-- "n  " SalesReturnDetail : 包含
+
+
+' Product 与 SalesReturnDetail: 一个商品可出现在多个退货详情中
+Product "1" <-- "  n" SalesReturnDetail : 关联
+@enduml
