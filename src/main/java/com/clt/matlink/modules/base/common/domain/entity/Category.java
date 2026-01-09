@@ -5,7 +5,7 @@ import com.clt.matlink.common.domain.entity.BaseEntity;
 import lombok.Data;
 
 @Data
-@TableName("hg_category")
+@TableName("clt_category")
 public class Category extends BaseEntity {
     private Long id;
     private String name;
