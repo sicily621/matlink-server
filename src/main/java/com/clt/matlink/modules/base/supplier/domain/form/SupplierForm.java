@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class SupplierForm extends PageQuery {
     private String name;
-    private String code;
+    private String supplierNo;
 }

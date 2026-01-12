@@ -16,22 +16,22 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 商品类型
+ * 物料分类
  */
-@RequestMapping("/product/category")
+@RequestMapping("/material/category")
 @RestController
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
     /**
-     * 新增商品类型
+     * 新增物料分类
      */
     @PostMapping()
     public Result<Category> create(@RequestBody Category category){
         return Result.success(categoryService.save(category));
     }
     /**
-     * 修改商品类型
+     * 修改物料分类
      * @param category
      * @return
      */
@@ -40,14 +40,14 @@ public class CategoryController {
         return Result.success(categoryService.save(category));
     }
     /**
-     * 根据商品类型Id查询商品类型
+     * 根据物料分类Id查询物料分类
      */
     @GetMapping("{id}")
     public Result<Category> getById(@PathVariable("id") Long id){
         return Result.success(categoryService.getById(id));
     }
     /**
-     * 根据商品类型Ids查询商品类型列表
+     * 根据物料分类Ids查询物料分类列表
      */
     @GetMapping("/getByIds/{ids}")
     public Result<List<Category>> getById(@PathVariable("ids") List<Long> ids){
@@ -55,7 +55,7 @@ public class CategoryController {
     }
 
     /**
-     * 删除商品类型
+     * 删除物料分类
      */
     @DeleteMapping("{id}")
     public Result<Void> deleteById(@PathVariable("id") Long id){
@@ -63,7 +63,7 @@ public class CategoryController {
         return Result.success();
     }
     /**
-     * 查询商品类型列表
+     * 查询物料分类列表
      */
     @GetMapping("/list")
     public Result<List<Category>> list(){

@@ -68,7 +68,7 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     public PageInfo<Supplier> page(SupplierForm supplierForm) {
         LambdaQueryWrapper<Supplier> lqw = Wrappers.lambdaQuery();
-        lqw.like(supplierForm.getCode()!=null, Supplier::getCode, supplierForm.getCode());
+        lqw.like(supplierForm.getSupplierNo()!=null, Supplier::getSupplierNo, supplierForm.getSupplierNo());
         lqw.like(supplierForm.getName()!=null, Supplier::getName, supplierForm.getName());
         lqw.eq( Supplier::getDelFlag, DelFlagEnum.NORMAL.getValue());
         Page<Supplier> page = supplierForm.build();
