@@ -5,7 +5,7 @@ import com.clt.matlink.common.domain.entity.BaseEntity;
 import lombok.Data;
 
 @Data
-@TableName("clt_material_stock_type")
+@TableName("clt_material_stock")
 public class Stock extends BaseEntity {
     private Long id;
     private String name;
