@@ -8,27 +8,29 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
-import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.modules.base.common.domain.entity.Material;
+import com.clt.matlink.modules.base.common.domain.entity.MaterialImage;
 import com.clt.matlink.modules.base.common.domain.form.MaterialForm;
+import com.clt.matlink.modules.base.common.domain.vo.MaterialVO;
 import com.clt.matlink.modules.base.common.mapper.MaterialMapper;
 import com.clt.matlink.modules.base.common.service.CategoryService;
+import com.clt.matlink.modules.base.common.service.MaterialImageService;
 import com.clt.matlink.modules.base.common.service.MaterialService;
-import com.clt.matlink.modules.purchase.domain.entity.PurchaseOrderDetail;
-import com.clt.matlink.modules.purchase.domain.form.PurchaseOrderDetailForm;
 import com.clt.matlink.modules.purchase.service.PurchaseOrderDetailService;
-import com.clt.matlink.modules.sales.domain.entity.SalesOrderDetail;
-import com.clt.matlink.modules.sales.domain.form.SalesOrderDetailForm;
 import com.clt.matlink.modules.sales.service.SalesOrderDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MaterialServiceImpl implements MaterialService {
     @Autowired
     private MaterialMapper materialMapper;
+
+    @Autowired
+    private MaterialImageService materialImageService;
 
     @Autowired
     private CategoryService categoryService;
@@ -92,11 +94,13 @@ public class MaterialServiceImpl implements MaterialService {
 
 
     @Override
-    public PageInfo<Material> page(MaterialForm materialForm, PageQuery pageQuery) {
+    public PageInfo<MaterialVO> page(MaterialForm materialForm, PageQuery pageQuery) {
         LambdaQueryWrapper<Material> lqw = getQueryWrapper(materialForm);
         Page<Material> page = pageQuery.build();
         Page<Material> result = materialMapper.selectPage(page, lqw);
-        PageInfo<Material> tableDataInfo = PageInfo.build(result);
+        PageInfo<MaterialVO> tableDataInfo = PageInfo.build(result, MaterialVO.class);
+        List<MaterialVO> list = tableDataInfo.getList();
+        setExProp(list);
         return tableDataInfo;
     }
 
@@ -119,5 +123,26 @@ public class MaterialServiceImpl implements MaterialService {
         lqw.in(CollUtil.isNotEmpty(categoryIds), Material::getTradeTypeId, categoryIds);
         lqw.eq( Material::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
+    }
+
+    @Override
+    public void setExProp(List<MaterialVO> rows) {
+        if(CollUtil.isEmpty(rows) || rows.get(0) == null){
+            return ;
+        }
+        List<Long> ids = CollStreamUtil.toList(rows,
+                                                MaterialVO::getId);
+        List<MaterialImage> images = materialImageService.getByIds(ids);
+        Map<Long, List<MaterialImage>> imagesMap = CollStreamUtil.groupByKey(images,
+                                                                               MaterialImage::getMaterialId);
+        // 设置扩展属性
+        for (MaterialVO row : rows) {
+            List<MaterialImage> materialImages = imagesMap.get(row.getId());
+            if(CollUtil.isNotEmpty(materialImages)){
+                List<String> imagePath = CollStreamUtil.toList(materialImages,
+                                                               MaterialImage::getImagePath);
+                row.setImageUrls(imagePath);
+            }
+        }
     }
 }

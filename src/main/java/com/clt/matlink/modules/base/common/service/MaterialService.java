@@ -4,6 +4,7 @@ import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.modules.base.common.domain.entity.Material;
 import com.clt.matlink.modules.base.common.domain.form.MaterialForm;
+import com.clt.matlink.modules.base.common.domain.vo.MaterialVO;
 
 import java.util.List;
 
@@ -19,7 +20,9 @@ public interface MaterialService {
 
     List<Material> list(MaterialForm materialForm);
 
-    PageInfo<Material> page(MaterialForm materialForm, PageQuery pageQuery);
+    PageInfo<MaterialVO> page(MaterialForm materialForm, PageQuery pageQuery);
 
     List<Material> batchSave(List<Material> materials);
+
+    void setExProp(List<MaterialVO> rows);
 }

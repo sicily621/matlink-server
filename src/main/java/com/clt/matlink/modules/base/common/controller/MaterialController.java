@@ -4,6 +4,7 @@ import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.domain.vo.Result;
 import com.clt.matlink.modules.base.common.domain.entity.Material;
 import com.clt.matlink.modules.base.common.domain.form.MaterialForm;
+import com.clt.matlink.modules.base.common.domain.vo.MaterialVO;
 import com.clt.matlink.modules.base.common.service.MaterialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -85,7 +86,7 @@ public class MaterialController {
      * 分页查询物料列表
      */
     @GetMapping("/page")
-    public Result<PageInfo<Material>> page(MaterialForm materialForm, PageQuery pageQuery){
+    public Result<PageInfo<MaterialVO>> page(MaterialForm materialForm, PageQuery pageQuery){
         return Result.success(materialService.page(materialForm, pageQuery));
     }
 
