@@ -4,7 +4,7 @@ myproject:
   name: matlink-server
 
   # 上传目录
-  uploadPath: D:/inventory/uploadPath
+  uploadPath: D:/matlink/uploadPath
   fileUrlPrefix: /static
 
 spring:
