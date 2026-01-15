@@ -6,4 +6,5 @@ import lombok.Data;
 @Data
 public class AuditFlowForm extends PageQuery {
     private String title;
+    private Long depId;
 }
