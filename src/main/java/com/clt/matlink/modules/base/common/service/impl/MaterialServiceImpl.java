@@ -11,6 +11,7 @@ import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.modules.base.common.domain.entity.Material;
 import com.clt.matlink.modules.base.common.domain.entity.MaterialImage;
 import com.clt.matlink.modules.base.common.domain.form.MaterialForm;
+import com.clt.matlink.modules.base.common.domain.form.MaterialImageForm;
 import com.clt.matlink.modules.base.common.domain.vo.MaterialVO;
 import com.clt.matlink.modules.base.common.mapper.MaterialMapper;
 import com.clt.matlink.modules.base.common.service.CategoryService;
@@ -132,7 +133,9 @@ public class MaterialServiceImpl implements MaterialService {
         }
         List<Long> ids = CollStreamUtil.toList(rows,
                                                 MaterialVO::getId);
-        List<MaterialImage> images = materialImageService.getByIds(ids);
+        MaterialImageForm materialImageForm = new MaterialImageForm();
+        materialImageForm.setMaterialIds(ids);
+        List<MaterialImage> images = materialImageService.list(materialImageForm);
         Map<Long, List<MaterialImage>> imagesMap = CollStreamUtil.groupByKey(images,
                                                                                MaterialImage::getMaterialId);
         // 设置扩展属性

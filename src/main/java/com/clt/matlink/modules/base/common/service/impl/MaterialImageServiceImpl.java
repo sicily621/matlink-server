@@ -107,6 +107,7 @@ public class MaterialImageServiceImpl implements MaterialImageService {
 
         LambdaQueryWrapper<MaterialImage> lqw = Wrappers.lambdaQuery();
         lqw.eq(materialImageForm.getMaterialId()!=null, MaterialImage::getMaterialId, materialImageForm.getMaterialId());
+        lqw.in(CollUtil.isNotEmpty(materialImageForm.getMaterialIds()), MaterialImage::getMaterialId, materialImageForm.getMaterialIds());
         lqw.eq( MaterialImage::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }
