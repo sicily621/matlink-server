@@ -11,7 +11,7 @@ public class AuditFlow extends BaseEntity {
     private String title;
     private Long resourceId;
     private Integer resourceType;
-    private Long depId;
+    private Long deptId;
     private String remark;
     private Integer enable;
     private Integer parentProcess;

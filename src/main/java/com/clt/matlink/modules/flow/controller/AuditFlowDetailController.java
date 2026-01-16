@@ -3,9 +3,9 @@ package com.clt.matlink.modules.flow.controller;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.domain.vo.Result;
-import com.clt.matlink.modules.flow.domain.entity.AuditFlow;
-import com.clt.matlink.modules.flow.domain.form.AuditFlowForm;
-import com.clt.matlink.modules.flow.service.AuditFlowService;
+import com.clt.matlink.modules.flow.domain.entity.AuditFlowDetail;
+import com.clt.matlink.modules.flow.domain.form.AuditFlowDetailForm;
+import com.clt.matlink.modules.flow.service.AuditFlowDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,45 +25,45 @@ import java.util.List;
 @RestController
 public class AuditFlowDetailController {
     @Autowired
-    private AuditFlowService auditFlowService;
+    private AuditFlowDetailService auditFlowDetailService;
     /**
      * 新建审批流程步骤
      */
     @PostMapping()
-    public Result<AuditFlow> create(@RequestBody AuditFlow auditFlow){
-        return Result.success(auditFlowService.save(auditFlow));
+    public Result<AuditFlowDetail> create(@RequestBody AuditFlowDetail auditFlowDetail){
+        return Result.success(auditFlowDetailService.save(auditFlowDetail));
     }
     /**
      * 修改审批流程步骤
-     * @param auditFlow
+     * @param auditFlowDetail
      * @return
      */
     @PutMapping()
-    public Result<AuditFlow> update(@RequestBody AuditFlow auditFlow){
-        return Result.success(auditFlowService.save(auditFlow));
+    public Result<AuditFlowDetail> update(@RequestBody AuditFlowDetail auditFlowDetail){
+        return Result.success(auditFlowDetailService.save(auditFlowDetail));
     }
     /**
      * 批量修改审批流程步骤
-     * @param auditFlows
+     * @param auditFlowDetails
      * @return
      */
     @PutMapping("batchUpdate")
-    public Result<List<AuditFlow>> batchUpdate(@RequestBody List<AuditFlow> auditFlows){
-        return Result.success(auditFlowService.batchSave(auditFlows));
+    public Result<List<AuditFlowDetail>> batchUpdate(@RequestBody List<AuditFlowDetail> auditFlowDetails){
+        return Result.success(auditFlowDetailService.batchSave(auditFlowDetails));
     }
     /**
      * 根据审批流程步骤Id查询审批流程步骤
      */
     @GetMapping("{id}")
-    public Result<AuditFlow> getById(@PathVariable("id") Long id){
-        return Result.success(auditFlowService.getById(id));
+    public Result<AuditFlowDetail> getById(@PathVariable("id") Long id){
+        return Result.success(auditFlowDetailService.getById(id));
     }
     /**
      * 根据审批流程步骤Ids查询审批流程步骤列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<AuditFlow>> getById(@PathVariable("ids") List<Long> ids){
-        return Result.success(auditFlowService.getByIds(ids));
+    public Result<List<AuditFlowDetail>> getById(@PathVariable("ids") List<Long> ids){
+        return Result.success(auditFlowDetailService.getByIds(ids));
     }
 
     /**
@@ -71,23 +71,23 @@ public class AuditFlowDetailController {
      */
     @DeleteMapping("{id}")
     public Result<Void> deleteById(@PathVariable("id") Long id){
-        auditFlowService.deleteById(id);
+        auditFlowDetailService.deleteById(id);
         return Result.success();
     }
     /**
      * 查询审批流程步骤列表
      */
     @GetMapping("/list")
-    public Result<List<AuditFlow>> list(AuditFlowForm auditFlowForm){
-        return Result.success(auditFlowService.list(auditFlowForm));
+    public Result<List<AuditFlowDetail>> list(AuditFlowDetailForm auditFlowDetailForm){
+        return Result.success(auditFlowDetailService.list(auditFlowDetailForm));
     }
 
     /**
      * 分页查询审批流程步骤列表
      */
     @GetMapping("/page")
-    public Result<PageInfo<AuditFlow>> page(AuditFlowForm auditFlowForm, PageQuery pageQuery){
-        return Result.success(auditFlowService.page(auditFlowForm, pageQuery));
+    public Result<PageInfo<AuditFlowDetail>> page(AuditFlowDetailForm auditFlowDetailForm, PageQuery pageQuery){
+        return Result.success(auditFlowDetailService.page(auditFlowDetailForm, pageQuery));
     }
 
 }
