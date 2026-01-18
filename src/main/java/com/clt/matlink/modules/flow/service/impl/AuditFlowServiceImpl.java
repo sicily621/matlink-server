@@ -44,6 +44,12 @@ public class AuditFlowServiceImpl implements AuditFlowService {
     }
 
     @Override
+    public AuditFlow getByCondition(AuditFlowForm auditFlowForm) {
+        LambdaQueryWrapper<AuditFlow> lqw = getQueryWrapper(auditFlowForm);
+        return auditFlowMapper.selectOne(lqw);
+    }
+
+    @Override
     public List<AuditFlow> getByIds(List<Long> ids) {
         LambdaQueryWrapper<AuditFlow> lqw = Wrappers.lambdaQuery();
         lqw.eq(AuditFlow::getDelFlag, DelFlagEnum.NORMAL.getValue());
@@ -84,6 +90,9 @@ public class AuditFlowServiceImpl implements AuditFlowService {
 
         LambdaQueryWrapper<AuditFlow> lqw = Wrappers.lambdaQuery();
         lqw.like(auditFlowForm.getTitle()!=null, AuditFlow::getTitle, auditFlowForm.getTitle());
+        lqw.eq(auditFlowForm.getDeptId()!=null, AuditFlow::getDeptId, auditFlowForm.getDeptId());
+        lqw.eq(auditFlowForm.getType()!=null, AuditFlow::getType, auditFlowForm.getType());
+        lqw.eq(auditFlowForm.getStockId()!=null, AuditFlow::getStockId, auditFlowForm.getStockId());
         lqw.eq( AuditFlow::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }

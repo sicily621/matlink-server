@@ -9,8 +9,8 @@ import lombok.Data;
 public class AuditFlow extends BaseEntity {
     private Long id;
     private String title;
-    private Long resourceId;
-    private Integer resourceType;
+    private Long stockId;
+    private Integer type;
     private Long deptId;
     private String remark;
     private Integer enable;

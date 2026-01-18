@@ -11,6 +11,7 @@ public interface AuditFlowService {
     AuditFlow save(AuditFlow auditFlow);
 
     AuditFlow getById(Long id);
+    AuditFlow getByCondition(AuditFlowForm auditFlowForm);
 
     List<AuditFlow> getByIds(List<Long> ids);
 

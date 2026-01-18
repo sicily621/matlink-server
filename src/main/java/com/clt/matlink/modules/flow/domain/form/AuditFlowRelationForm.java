@@ -1,14 +1,15 @@
 package com.clt.matlink.modules.flow.domain.form;
 
 import com.clt.matlink.common.domain.form.PageQuery;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public class AuditFlowForm extends PageQuery {
+public class AuditFlowRelationForm extends PageQuery {
+    private List<Long> ids;
     private String title;
     private Long deptId;
-    private Integer type;
-    private Long stockId;
+    private List<Integer> auditStatusList;
 
 }
