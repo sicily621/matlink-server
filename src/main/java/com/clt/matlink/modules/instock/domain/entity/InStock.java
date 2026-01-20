@@ -24,5 +24,4 @@ public class InStock extends BaseEntity {
     private Long auditUserId;
     private Date auditTime;
     private Long createUserId;
-    private Long source;
 }

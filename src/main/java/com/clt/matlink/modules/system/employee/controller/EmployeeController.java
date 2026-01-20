@@ -3,6 +3,7 @@ package com.clt.matlink.modules.system.employee.controller;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.domain.vo.Result;
+import com.clt.matlink.modules.system.department.domain.entity.Department;
 import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import com.clt.matlink.modules.system.employee.domain.form.EmployeeForm;
 import com.clt.matlink.modules.system.employee.service.EmployeeService;
@@ -53,6 +54,13 @@ public class EmployeeController {
     @GetMapping("{username}")
     public Result<Employee> getByUsername(@PathVariable("id") String username){
         return Result.success(employeeService.getByUsername(username));
+    }
+    /**
+     * 根据员工Ids查询员工列表
+     */
+    @GetMapping("/getByIds/{ids}")
+    public Result<List<Employee>> getById(@PathVariable("ids") List<Long> ids){
+        return Result.success(employeeService.getByIds(ids));
     }
     /**
      * 删除员工

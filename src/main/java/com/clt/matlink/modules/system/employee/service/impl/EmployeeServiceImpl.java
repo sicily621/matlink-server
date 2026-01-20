@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
+import com.clt.matlink.modules.system.department.domain.entity.Department;
 import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import com.clt.matlink.modules.system.employee.domain.form.EmployeeForm;
 import com.clt.matlink.modules.system.employee.mapper.EmployeeMapper;
@@ -87,6 +88,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         lqw.eq( Employee::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }
-
-
+    @Override
+    public List<Employee> getByIds(List<Long> ids) {
+        LambdaQueryWrapper<Employee> lqw = Wrappers.lambdaQuery();
+        lqw.eq( Employee::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        lqw.in( Employee::getId, ids);
+        return employeeMapper.selectList(lqw);
+    }
 }

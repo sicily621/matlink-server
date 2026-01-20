@@ -1,8 +1,5 @@
 package com.clt.matlink.modules.flow.service.impl;
 
-import java.util.Date;
-
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -12,13 +9,18 @@ import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.common.exception.ServiceException;
-import com.clt.matlink.common.security.EmployeeHelper;
+import com.clt.matlink.common.security.LoginHelper;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlow;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowDetail;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowDetailRelation;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
 import com.clt.matlink.modules.flow.domain.enums.MateriaAuditStatusEnum;
-import com.clt.matlink.modules.flow.domain.form.*;
+import com.clt.matlink.modules.flow.domain.form.AuditFlowDetailForm;
+import com.clt.matlink.modules.flow.domain.form.AuditFlowDetailRelationForm;
+import com.clt.matlink.modules.flow.domain.form.AuditFlowForm;
+import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
+import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationForm;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
 import com.clt.matlink.modules.flow.mapper.AuditFlowRelationMapper;
 import com.clt.matlink.modules.flow.service.AuditFlowDetailRelationService;
@@ -32,6 +34,7 @@ import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -93,7 +96,7 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
     public List<AuditFlowRelation> listAuditBeingByCurrentUser(AuditFlowRelationCurrentUserQuery auditFlowRelationCurrentUserQuery) {
         Long userId = auditFlowRelationCurrentUserQuery.getUserId();
         if (userId == null) {
-            userId = EmployeeHelper.getLoginEmployeeId();
+            userId = LoginHelper.getLoginEmployeeId();
         }
         Employee currentUser = employeeService.getById(userId);
         if (currentUser == null) {
@@ -170,13 +173,13 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
 
         //没有审批步骤或者审批流程禁用，直接审批通过
         if (CollUtil.isEmpty(auditFlowDetailList) || auditFlow.getEnable() == 0) {
-            Long currentUserId = EmployeeHelper.getLoginEmployeeId();
-            Employee currentUser = EmployeeHelper.getLoginEmployee();
+            Long currentUserId = LoginHelper.getLoginEmployeeId();
+            Employee currentUser = LoginHelper.getLoginEmployee();
 
             auditFlowRelation.setEnable(0);
             auditFlowRelation.setAuditStatus(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus());
             auditFlowRelation.setAuditTime(now);
-            auditFlowRelation.setAuditUserId((Long) StpUtil.getLoginId());
+            auditFlowRelation.setAuditUserId(LoginHelper.getLoginEmployeeId());
             this.save(auditFlowRelation);
             AuditFlowDetailRelation auditFlowDetailRelation = new AuditFlowDetailRelation();
             auditFlowDetailRelation.setFlowId(auditFlowRelation.getId());

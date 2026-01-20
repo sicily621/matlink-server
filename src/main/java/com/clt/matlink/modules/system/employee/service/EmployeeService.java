@@ -2,6 +2,7 @@ package com.clt.matlink.modules.system.employee.service;
 
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
+import com.clt.matlink.modules.system.department.domain.entity.Department;
 import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import com.clt.matlink.modules.system.employee.domain.form.EmployeeForm;
 
@@ -19,4 +20,5 @@ public interface EmployeeService {
     Employee getByUsername(String username);
 
     List<Employee> list(EmployeeForm employeeForm);
+    List<Employee> getByIds(List<Long> ids);
 }

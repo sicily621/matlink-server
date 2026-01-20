@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @TableName("clt_material")
 public class Material extends BaseEntity {
         private Long id;
-        private Long tradeTypeId;
+        private Long materialTypeId;
         private String code;
         private String name;
         private String simpleName;

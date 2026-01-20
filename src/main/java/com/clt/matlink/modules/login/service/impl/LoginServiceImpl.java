@@ -4,6 +4,7 @@ import cn.dev33.satoken.secure.BCrypt;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.clt.matlink.common.exception.ServiceException;
+import com.clt.matlink.common.security.LoginHelper;
 import com.clt.matlink.common.utils.ip.IpUtils;
 import com.clt.matlink.modules.login.domain.entity.LoginLog;
 import com.clt.matlink.modules.login.domain.form.LoginForm;
@@ -40,8 +41,8 @@ public class LoginServiceImpl implements LoginService {
         if(employee!=null){
 //            if(employee.getPassword().equals(password)){
             if(checkPwd(password, employee)){
-                StpUtil.login(employee.getId());
-                StpUtil.getTokenSession().set(""+employee.getId(), employee);
+                StpUtil.login(""+employee.getId());
+                StpUtil.getTokenSession().set(LoginHelper.LOGIN_EMPLOYEE_KEY, employee);
                 loginResponse.setId(employee.getId());
                 loginResponse.setRoleId(employee.getRoleId());
                 loginResponse.setDepartmentId(employee.getDepartmentId());

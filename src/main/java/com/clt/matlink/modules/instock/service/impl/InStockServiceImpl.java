@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
-import com.clt.matlink.common.security.EmployeeHelper;
+import com.clt.matlink.common.security.LoginHelper;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
 import com.clt.matlink.modules.flow.domain.enums.MateriaAuditResourceTypeEnum;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
@@ -20,6 +20,7 @@ import com.clt.matlink.modules.instock.domain.form.InStockSaveParam;
 import com.clt.matlink.modules.instock.domain.vo.InStockVo;
 import com.clt.matlink.modules.instock.mapper.InStockMapper;
 import com.clt.matlink.modules.instock.service.InStockService;
+import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -88,7 +89,7 @@ public class InStockServiceImpl implements InStockService {
 
     @Override
     public PageInfo<InStockVo> page(InStockForm form, PageQuery pageQuery) {
-        Long userId = EmployeeHelper.getLoginEmployeeId();
+        Long userId = LoginHelper.getLoginEmployeeId();
 
         LambdaQueryWrapper<InStock> lqw = getQueryWrapper(form);
         Page<InStock> page = pageQuery.build();
