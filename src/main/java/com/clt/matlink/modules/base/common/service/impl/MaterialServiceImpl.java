@@ -114,14 +114,14 @@ public class MaterialServiceImpl implements MaterialService {
     }
 
     private LambdaQueryWrapper<Material> getQueryWrapper(MaterialForm materialForm) {
-        Long categoryId = materialForm.getTradeTypeId();
+        Long categoryId = materialForm.getMaterialTypeId();
         List<Long> categoryIds = categoryService.findAllChild(categoryId, true);
         LambdaQueryWrapper<Material> lqw = Wrappers.lambdaQuery();
         lqw.like(materialForm.getCode()!=null, Material::getCode, materialForm.getCode());
         lqw.like(materialForm.getName()!=null, Material::getName, materialForm.getName());
         lqw.like(materialForm.getBrand()!=null, Material::getBrand, materialForm.getBrand());
         lqw.like(materialForm.getSpecification()!=null, Material::getSpecification, materialForm.getSpecification());
-        lqw.in(CollUtil.isNotEmpty(categoryIds), Material::getTradeTypeId, categoryIds);
+        lqw.in(CollUtil.isNotEmpty(categoryIds), Material::getMaterialTypeId, categoryIds);
         lqw.eq( Material::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }

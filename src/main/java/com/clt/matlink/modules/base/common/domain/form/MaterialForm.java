@@ -8,6 +8,6 @@ public class MaterialForm {
     private String name;
     private String brand;
     private String specification;
-    private Long tradeTypeId;
+    private Long materialTypeId;
 }
 
