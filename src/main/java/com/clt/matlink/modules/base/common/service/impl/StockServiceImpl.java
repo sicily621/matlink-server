@@ -6,11 +6,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.common.exception.ServiceException;
-import com.clt.matlink.modules.base.common.domain.entity.Product;
 import com.clt.matlink.modules.base.common.domain.entity.Stock;
-import com.clt.matlink.modules.base.common.domain.form.ProductForm;
 import com.clt.matlink.modules.base.common.mapper.StockMapper;
-import com.clt.matlink.modules.base.common.service.ProductService;
 import com.clt.matlink.modules.base.common.service.StockService;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +20,6 @@ import java.util.Map;
 public class StockServiceImpl implements StockService {
     @Autowired
     private StockMapper stockMapper;
-    @Autowired
-    private ProductService productService;
     @Override
     public Stock save(Stock stock) {
         int flag = 0;
@@ -56,12 +51,6 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public Boolean deleteById(Long id) {
-        ProductForm productForm = new ProductForm();
-//        productForm.setStockId(id);
-        List<Product> productList = productService.list(productForm);
-        if(CollUtil.isNotEmpty(productList)){
-            throw new ServiceException("存在关联商品，无法删除");
-        }
         stockMapper.deleteById(id);
         return true;
     }

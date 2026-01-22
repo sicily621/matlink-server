@@ -17,8 +17,6 @@ import com.clt.matlink.modules.base.common.mapper.MaterialMapper;
 import com.clt.matlink.modules.base.common.service.CategoryService;
 import com.clt.matlink.modules.base.common.service.MaterialImageService;
 import com.clt.matlink.modules.base.common.service.MaterialService;
-import com.clt.matlink.modules.purchase.service.PurchaseOrderDetailService;
-import com.clt.matlink.modules.sales.service.SalesOrderDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,10 +33,6 @@ public class MaterialServiceImpl implements MaterialService {
 
     @Autowired
     private CategoryService categoryService;
-    @Autowired
-    private PurchaseOrderDetailService purchaseOrderDetailService;
-    @Autowired
-    private SalesOrderDetailService salesOrderDetailService;
     @Override
     public Material save(Material material) {
         int flag = 0;
@@ -70,18 +64,6 @@ public class MaterialServiceImpl implements MaterialService {
 
     @Override
     public Boolean deleteById(Long id) {
-//        PurchaseOrderDetailForm purchaseOrderDetailForm = new PurchaseOrderDetailForm();
-//        purchaseOrderDetailForm.setMaterialId(id);
-//        List<PurchaseOrderDetail> PurchaseOrderDetails = purchaseOrderDetailService.list(purchaseOrderDetailForm);
-//        if(CollUtil.isNotEmpty(PurchaseOrderDetails)){
-//            throw new ServiceException("存在关联的采购订单，无法删除");
-//        }
-//        SalesOrderDetailForm salesOrderDetailForm = new SalesOrderDetailForm();
-//        salesOrderDetailForm.setMaterialId(id);
-//        List<SalesOrderDetail> salesOrderDetailList = salesOrderDetailService.list(salesOrderDetailForm);
-//        if(CollUtil.isNotEmpty(salesOrderDetailList)){
-//            throw new ServiceException("存在关联的销售订单，无法删除");
-//        }
         materialMapper.deleteById(id);
         return true;
     }

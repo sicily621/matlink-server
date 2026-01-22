@@ -1,0 +1,133 @@
+package com.clt.matlink.modules.purchase.service.impl;
+
+import cn.hutool.core.collection.CollStreamUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.clt.matlink.common.domain.form.PageQuery;
+import com.clt.matlink.common.domain.vo.PageInfo;
+import com.clt.matlink.common.enums.DelFlagEnum;
+import com.clt.matlink.common.security.LoginHelper;
+import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
+import com.clt.matlink.modules.flow.domain.enums.MateriaAuditResourceTypeEnum;
+import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
+import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
+import com.clt.matlink.modules.flow.service.AuditFlowRelationService;
+import com.clt.matlink.modules.purchase.domain.entity.Purchase;
+import com.clt.matlink.modules.purchase.domain.form.PurchaseForm;
+import com.clt.matlink.modules.purchase.domain.vo.PurchaseVo;
+import com.clt.matlink.modules.purchase.mapper.PurchaseMapper;
+import com.clt.matlink.modules.purchase.service.PurchaseService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class PurchaseServiceImpl implements PurchaseService {
+    @Autowired
+    private PurchaseMapper purchaseMapper;
+    @Autowired
+    private AuditFlowRelationService auditFlowRelationService;
+    @Override
+    public Purchase save(Purchase purchase) {
+        int flag = 0;
+        if(purchase.getId()==null){
+            //生成审批流
+            flag= purchaseMapper.insert(purchase);
+            MaterialAuditRelationGenerateParam generateParam = new MaterialAuditRelationGenerateParam();
+            generateParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
+            generateParam.setStockId(purchase.getStockId());
+            generateParam.setOrderId(purchase.getId());
+            generateParam.setDeptId(purchase.getDeptId());
+
+
+            MaterialAuditRelationGenerateResult generateResult = auditFlowRelationService.generateAuditFlowRelation(generateParam);
+            AuditFlowRelation auditFlowRelation = generateResult.getAuditFlowRelation();
+            purchase.setAuditStatus(auditFlowRelation.getAuditStatus());
+            purchase.setAuditTime(auditFlowRelation.getAuditTime());
+            purchase.setAuditUserId(auditFlowRelation.getAuditUserId());
+            purchaseMapper.updateById(purchase);
+            // TODO 是否直接入库
+        }else{
+            flag = purchaseMapper.updateById(purchase);
+        }
+        if(flag>0){
+            return purchaseMapper.selectById(purchase.getId());
+        }else{
+            return null;
+        }
+    }
+
+    @Override
+    public Purchase getById(Long id) {
+        return purchaseMapper.selectById(id);
+    }
+
+    @Override
+    public List<Purchase> getByIds(List<Long> ids) {
+        LambdaQueryWrapper<Purchase> lqw = Wrappers.lambdaQuery();
+        lqw.eq(Purchase::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        lqw.in( Purchase::getId, ids);
+        return purchaseMapper.selectList(lqw);
+    }
+
+    @Override
+    public Boolean deleteById(Long id) {
+        purchaseMapper.deleteById(id);
+        return true;
+    }
+
+    @Override
+    public List<Purchase> list(PurchaseForm form) {
+        LambdaQueryWrapper<Purchase> lqw = getQueryWrapper(form);
+        return purchaseMapper.selectList(lqw);
+    }
+
+    @Override
+    public PageInfo<PurchaseVo> page(PurchaseForm form, PageQuery pageQuery) {
+        Long userId = LoginHelper.getLoginEmployeeId();
+
+        LambdaQueryWrapper<Purchase> lqw = getQueryWrapper(form);
+        Page<Purchase> page = pageQuery.build();
+        Page<Purchase> result = purchaseMapper.selectPage(page, lqw);
+        PageInfo<PurchaseVo> tableDataInfo = PageInfo.build(result,PurchaseVo.class );
+        List<PurchaseVo> list = tableDataInfo.getList();
+
+        AuditFlowRelationCurrentUserQuery flowRelationCurrentUserQuery = new AuditFlowRelationCurrentUserQuery();
+        flowRelationCurrentUserQuery.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
+        flowRelationCurrentUserQuery.setStockId(form.getStockId());
+        List<Long> beingOrderIds = auditFlowRelationService.listAuditBeingOrderIdsByCurrentUser(flowRelationCurrentUserQuery);
+        for (PurchaseVo purchaseVo : list) {
+            if(beingOrderIds.contains(purchaseVo.getId())){
+                purchaseVo.setHasAuditAuth(true);//当前登陆人有待审批
+            }
+            if (purchaseVo.getApplyUserId().equals(userId)) {
+                purchaseVo.setHasInStockAuth(true);//当前登陆人有入库权限
+            }
+        }
+        return tableDataInfo;
+    }
+
+    @Override
+    public List<Purchase> batchSave(List<Purchase> auditFlowDetails) {
+        purchaseMapper.insertOrUpdateBatch(auditFlowDetails);
+        List<Long> list = CollStreamUtil.toList(auditFlowDetails, Purchase::getId);
+        List<Purchase> result = getByIds(list);
+        return result;
+    }
+
+    private LambdaQueryWrapper<Purchase> getQueryWrapper(PurchaseForm form) {
+
+        LambdaQueryWrapper<Purchase> lqw = Wrappers.lambdaQuery();
+        lqw.eq(form.getStockId()!=null, Purchase::getStockId, form.getStockId());
+        lqw.eq(form.getStatus()!=null, Purchase::getStatus, form.getStatus());
+        lqw.eq(form.getAuditStatus()!=null, Purchase::getAuditStatus, form.getAuditStatus());
+        lqw.ge(form.getStartTime()!=null, Purchase::getApplyDate, form.getStartTime());
+        lqw.le(form.getEndTime()!=null, Purchase::getApplyDate, form.getEndTime());
+        lqw.eq( Purchase::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        return lqw;
+    }
+
+}

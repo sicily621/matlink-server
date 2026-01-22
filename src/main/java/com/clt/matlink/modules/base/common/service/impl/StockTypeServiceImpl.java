@@ -5,13 +5,9 @@ import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.clt.matlink.common.enums.DelFlagEnum;
-import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.modules.base.common.domain.entity.StockType;
-import com.clt.matlink.modules.base.common.domain.entity.Product;
-import com.clt.matlink.modules.base.common.domain.form.ProductForm;
 import com.clt.matlink.modules.base.common.mapper.StockTypeMapper;
 import com.clt.matlink.modules.base.common.service.StockTypeService;
-import com.clt.matlink.modules.base.common.service.ProductService;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,8 +19,6 @@ import java.util.Map;
 public class StockTypeServiceImpl implements StockTypeService {
     @Autowired
     private StockTypeMapper stockTypeMapper;
-    @Autowired
-    private ProductService productService;
     @Override
     public StockType save(StockType stockType) {
         int flag = 0;
@@ -56,12 +50,6 @@ public class StockTypeServiceImpl implements StockTypeService {
 
     @Override
     public Boolean deleteById(Long id) {
-        ProductForm productForm = new ProductForm();
-//        productForm.setStockTypeId(id);
-        List<Product> productList = productService.list(productForm);
-        if(CollUtil.isNotEmpty(productList)){
-            throw new ServiceException("存在关联商品，无法删除");
-        }
         stockTypeMapper.deleteById(id);
         return true;
     }

@@ -7,10 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.modules.base.common.domain.entity.Unit;
-import com.clt.matlink.modules.base.common.domain.entity.Product;
-import com.clt.matlink.modules.base.common.domain.form.ProductForm;
 import com.clt.matlink.modules.base.common.mapper.UnitMapper;
-import com.clt.matlink.modules.base.common.service.ProductService;
 import com.clt.matlink.modules.base.common.service.UnitService;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +20,6 @@ import java.util.Map;
 public class UnitServiceImpl implements UnitService {
     @Autowired
     private UnitMapper unitMapper;
-    @Autowired
-    private ProductService productService;
     @Override
     public Unit save(Unit unit) {
         int flag = 0;
@@ -56,12 +51,6 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public Boolean deleteById(Long id) {
-        ProductForm productForm = new ProductForm();
-//        productForm.setUnitId(id);
-        List<Product> productList = productService.list(productForm);
-        if(CollUtil.isNotEmpty(productList)){
-            throw new ServiceException("存在关联物料，无法删除");
-        }
         unitMapper.deleteById(id);
         return true;
     }
