@@ -20,7 +20,7 @@ public class OutBoundApply extends BaseEntity {
     private Integer status;
     private Long auditUserId;
     private Date auditTime;
-    private String useage;
+    private String purpose;
     private String description;
     private Long createUserId;
 }

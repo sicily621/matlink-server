@@ -122,6 +122,7 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
 
         LambdaQueryWrapper<OutBoundApply> lqw = Wrappers.lambdaQuery();
         lqw.eq(form.getStockId()!=null, OutBoundApply::getStockId, form.getStockId());
+        lqw.like(form.getApplyNo()!=null, OutBoundApply::getApplyNo, form.getApplyNo());
         lqw.eq(form.getStatus()!=null, OutBoundApply::getStatus, form.getStatus());
         lqw.eq(form.getAuditStatus()!=null, OutBoundApply::getAuditStatus, form.getAuditStatus());
         lqw.ge(form.getStartTime()!=null, OutBoundApply::getApplyTime, form.getStartTime());

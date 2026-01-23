@@ -36,9 +36,9 @@ public class InStockDetailController {
     /**
      * 删除入库详情
      */
-    @DeleteMapping("{stockId}")
-    public Result<Void> deleteByStockId(@PathVariable("stockId") Long stockId){
-        inStockDetailService.deleteByInStockId(stockId);
+    @DeleteMapping("{inStockId}")
+    public Result<Void> deleteByInStockId(@PathVariable("inStockId") Long inStockId){
+        inStockDetailService.deleteByInStockId(inStockId);
         return Result.success();
     }
     /**

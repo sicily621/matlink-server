@@ -126,6 +126,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         lqw.eq(form.getAuditStatus()!=null, Purchase::getAuditStatus, form.getAuditStatus());
         lqw.ge(form.getStartTime()!=null, Purchase::getApplyDate, form.getStartTime());
         lqw.le(form.getEndTime()!=null, Purchase::getApplyDate, form.getEndTime());
+        lqw.like(form.getBillNo()!=null, Purchase::getBillNo, form.getBillNo());
         lqw.eq( Purchase::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }

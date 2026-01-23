@@ -7,7 +7,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-@TableName("clt_material_outbound_apply")
+@TableName("clt_material_outbound_apply_detail")
 public class OutBoundApplyDetail  extends BaseEntity {
     private Long id;
     private Long applyId;

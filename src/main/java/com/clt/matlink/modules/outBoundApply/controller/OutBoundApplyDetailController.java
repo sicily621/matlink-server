@@ -36,9 +36,9 @@ public class OutBoundApplyDetailController {
     /**
      * 删除物料领用详情
      */
-    @DeleteMapping("{billId}")
-    public Result<Void> deleteByApplyId(@PathVariable("billId") Long billId){
-        outBoundApplyDetailService.deleteByApplyId(billId);
+    @DeleteMapping("{applyId}")
+    public Result<Void> deleteByApplyId(@PathVariable("applyId") Long applyId){
+        outBoundApplyDetailService.deleteByApplyId(applyId);
         return Result.success();
     }
     /**
