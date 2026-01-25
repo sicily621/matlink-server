@@ -49,17 +49,17 @@ public class EmployeeController {
         return Result.success(employeeService.getById(id));
     }
     /**
-     * 根据员工Id查询员工
+     * 根据员工名字查询员工
      */
-    @GetMapping("{username}")
-    public Result<Employee> getByUsername(@PathVariable("id") String username){
+    @GetMapping("/getByUsername/{username}")
+    public Result<Employee> getByUsername(@PathVariable("username") String username){
         return Result.success(employeeService.getByUsername(username));
     }
     /**
      * 根据员工Ids查询员工列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Employee>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Employee>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(employeeService.getByIds(ids));
     }
     /**

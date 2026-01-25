@@ -11,7 +11,6 @@ import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.modules.base.common.domain.entity.MaterialImage;
 import com.clt.matlink.modules.base.common.domain.form.MaterialImageForm;
 import com.clt.matlink.modules.base.common.mapper.MaterialImageMapper;
-import com.clt.matlink.modules.base.common.service.CategoryService;
 import com.clt.matlink.modules.base.common.service.MaterialImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,20 +20,18 @@ import java.util.List;
 @Service
 public class MaterialImageServiceImpl implements MaterialImageService {
     @Autowired
-    private MaterialImageMapper materialImageImageMapper;
+    private MaterialImageMapper materialImageMapper;
 
-    @Autowired
-    private CategoryService categoryService;
     @Override
     public MaterialImage save(MaterialImage materialImage) {
         int flag = 0;
         if(materialImage.getId()==null){
-            flag= materialImageImageMapper.insert(materialImage);
+            flag= materialImageMapper.insert(materialImage);
         }else{
-            flag = materialImageImageMapper.updateById(materialImage);
+            flag = materialImageMapper.updateById(materialImage);
         }
         if(flag>0){
-            return materialImageImageMapper.selectById(materialImage.getId());
+            return materialImageMapper.selectById(materialImage.getId());
         }else{
             return null;
         }
@@ -43,7 +40,7 @@ public class MaterialImageServiceImpl implements MaterialImageService {
 
     @Override
     public MaterialImage getById(Long id) {
-        return materialImageImageMapper.selectById(id);
+        return materialImageMapper.selectById(id);
     }
 
     @Override
@@ -51,19 +48,19 @@ public class MaterialImageServiceImpl implements MaterialImageService {
         LambdaQueryWrapper<MaterialImage> lqw = Wrappers.lambdaQuery();
         lqw.eq(MaterialImage::getDelFlag, DelFlagEnum.NORMAL.getValue());
         lqw.in( MaterialImage::getId, ids);
-        return materialImageImageMapper.selectList(lqw);
+        return materialImageMapper.selectList(lqw);
     }
 
     @Override
     public Boolean deleteById(Long id) {
-        materialImageImageMapper.deleteById(id);
+        materialImageMapper.deleteById(id);
         return true;
     }
 
     @Override
     public List<MaterialImage> list(MaterialImageForm materialImageForm) {
         LambdaQueryWrapper<MaterialImage> lqw = getQueryWrapper(materialImageForm);
-        return materialImageImageMapper.selectList(lqw);
+        return materialImageMapper.selectList(lqw);
     }
 
 
@@ -72,14 +69,14 @@ public class MaterialImageServiceImpl implements MaterialImageService {
     public PageInfo<MaterialImage> page(MaterialImageForm materialImageForm, PageQuery pageQuery) {
         LambdaQueryWrapper<MaterialImage> lqw = getQueryWrapper(materialImageForm);
         Page<MaterialImage> page = pageQuery.build();
-        Page<MaterialImage> result = materialImageImageMapper.selectPage(page, lqw);
+        Page<MaterialImage> result = materialImageMapper.selectPage(page, lqw);
         PageInfo<MaterialImage> tableDataInfo = PageInfo.build(result);
         return tableDataInfo;
     }
 
     @Override
     public List<MaterialImage> batchSave(List<MaterialImage> materialImages) {
-        materialImageImageMapper.insertOrUpdateBatch(materialImages);
+        materialImageMapper.insertOrUpdateBatch(materialImages);
         List<Long> list = CollStreamUtil.toList(materialImages,MaterialImage::getId);
         List<MaterialImage> result = getByIds(list);
         return result;

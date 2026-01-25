@@ -45,7 +45,7 @@ public class RoleController {
      * 根据角色Ids查询角色列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Role>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Role>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(roleService.getByIds(ids));
     }
 

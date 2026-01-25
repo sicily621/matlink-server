@@ -9,7 +9,7 @@ import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.common.security.LoginHelper;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
-import com.clt.matlink.modules.flow.domain.enums.MateriaAuditResourceTypeEnum;
+import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
@@ -37,7 +37,7 @@ public class PurchaseServiceImpl implements PurchaseService {
             //生成审批流
             flag= purchaseMapper.insert(purchase);
             MaterialAuditRelationGenerateParam generateParam = new MaterialAuditRelationGenerateParam();
-            generateParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
+            generateParam.setType(MateriaAuditResourceTypeEnum.PURCHASING.getValue());
             generateParam.setStockId(purchase.getStockId());
             generateParam.setOrderId(purchase.getId());
             generateParam.setDeptId(purchase.getDeptId());
@@ -96,7 +96,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         List<PurchaseVo> list = tableDataInfo.getList();
 
         AuditFlowRelationCurrentUserQuery flowRelationCurrentUserQuery = new AuditFlowRelationCurrentUserQuery();
-        flowRelationCurrentUserQuery.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
+        flowRelationCurrentUserQuery.setType(MateriaAuditResourceTypeEnum.PURCHASING.getValue());
         flowRelationCurrentUserQuery.setStockId(form.getStockId());
         List<Long> beingOrderIds = auditFlowRelationService.listAuditBeingOrderIdsByCurrentUser(flowRelationCurrentUserQuery);
         for (PurchaseVo purchaseVo : list) {

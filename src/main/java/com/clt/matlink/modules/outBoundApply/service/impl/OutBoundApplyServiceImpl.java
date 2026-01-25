@@ -9,7 +9,7 @@ import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.common.security.LoginHelper;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
-import com.clt.matlink.modules.flow.domain.enums.MateriaAuditResourceTypeEnum;
+import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
@@ -37,7 +37,7 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
             //生成审批流
             flag= outBoundApplyMapper.insert(outBoundApply);
             MaterialAuditRelationGenerateParam generateParam = new MaterialAuditRelationGenerateParam();
-            generateParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
+            generateParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_OUTBOUND.getValue());
             generateParam.setStockId(outBoundApply.getStockId());
             generateParam.setOrderId(outBoundApply.getId());
             generateParam.setDeptId(outBoundApply.getDeptId());
@@ -96,7 +96,7 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
         List<OutBoundApplyVo> list = tableDataInfo.getList();
 
         AuditFlowRelationCurrentUserQuery flowRelationCurrentUserQuery = new AuditFlowRelationCurrentUserQuery();
-        flowRelationCurrentUserQuery.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
+        flowRelationCurrentUserQuery.setType(MateriaAuditResourceTypeEnum.MATERIAL_OUTBOUND.getValue());
         flowRelationCurrentUserQuery.setStockId(form.getStockId());
         List<Long> beingOrderIds = auditFlowRelationService.listAuditBeingOrderIdsByCurrentUser(flowRelationCurrentUserQuery);
         for (OutBoundApplyVo outBoundApplyVo : list) {

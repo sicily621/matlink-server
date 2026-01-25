@@ -43,7 +43,7 @@ public class UnitController {
      * 根据物料单位Ids查询物料单位列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Unit>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Unit>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(unitService.getByIds(ids));
     }
 

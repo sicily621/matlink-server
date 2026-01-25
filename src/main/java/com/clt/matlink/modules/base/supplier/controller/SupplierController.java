@@ -52,7 +52,7 @@ public class SupplierController {
      * 根据供应商Ids查询供应商列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Supplier>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Supplier>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(supplierService.getByIds(ids));
     }
 

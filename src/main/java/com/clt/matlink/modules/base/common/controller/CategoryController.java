@@ -50,7 +50,7 @@ public class CategoryController {
      * 根据物料分类Ids查询物料分类列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Category>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Category>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(categoryService.getByIds(ids));
     }
 

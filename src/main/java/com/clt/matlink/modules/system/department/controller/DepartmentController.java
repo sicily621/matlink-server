@@ -44,7 +44,7 @@ public class DepartmentController {
      * 根据部门Ids查询部门列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Department>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Department>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(departmentService.getByIds(ids));
     }
 

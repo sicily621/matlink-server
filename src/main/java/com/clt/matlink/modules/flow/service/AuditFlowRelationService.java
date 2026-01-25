@@ -6,7 +6,9 @@ import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationForm;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
+import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 
 import java.util.List;
 
@@ -30,6 +32,6 @@ public interface AuditFlowRelationService {
 
     MaterialAuditRelationGenerateResult generateAuditFlowRelation(MaterialAuditRelationGenerateParam generateParam);
 
-
+    MaterialAuditRelationResult processAuditFlowRelation(MaterialAuditRelationParam vo);
 
 }

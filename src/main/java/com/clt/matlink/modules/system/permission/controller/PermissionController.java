@@ -45,7 +45,7 @@ public class PermissionController {
      * 根据权限Ids查询权限列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Permission>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Permission>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(permissionService.getByIds(ids));
     }
 

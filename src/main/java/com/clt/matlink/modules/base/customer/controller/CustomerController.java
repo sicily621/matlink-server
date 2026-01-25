@@ -52,7 +52,7 @@ public class CustomerController {
      * 根据客户Ids查询客户列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Customer>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Customer>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(customerService.getByIds(ids));
     }
 

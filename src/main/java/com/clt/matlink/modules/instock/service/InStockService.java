@@ -2,6 +2,7 @@ package com.clt.matlink.modules.instock.service;
 
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.instock.domain.entity.InStock;
 import com.clt.matlink.modules.instock.domain.form.InStockForm;
 import com.clt.matlink.modules.instock.domain.form.InStockSaveParam;
@@ -23,4 +24,6 @@ public interface InStockService {
     PageInfo<InStockVo> page(InStockForm inStockForm, PageQuery pageQuery);
 
     List<InStock> batchSave(List<InStock> auditFlowDetails);
+
+    InStock updateAuditStatus(MaterialAuditRelationParam generateParam);
 }

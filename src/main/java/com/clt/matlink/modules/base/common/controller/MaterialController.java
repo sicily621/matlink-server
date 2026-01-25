@@ -62,7 +62,7 @@ public class MaterialController {
      * 根据物料Ids查询物料列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Material>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Material>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(materialService.getByIds(ids));
     }
 

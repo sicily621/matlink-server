@@ -64,7 +64,7 @@ public class PurchaseController {
      * 根据采购Ids查询采购列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Purchase>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Purchase>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(purchaseService.getByIds(ids));
     }
 

@@ -52,7 +52,7 @@ public class StockController {
      * 根据物料库Ids查询物料库列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<Stock>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<Stock>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(stockService.getByIds(ids));
     }
 

@@ -8,6 +8,7 @@ import com.clt.matlink.modules.instock.domain.form.InStockForm;
 import com.clt.matlink.modules.instock.domain.form.InStockSaveParam;
 import com.clt.matlink.modules.instock.domain.vo.InStockVo;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface InStockDetailService {
@@ -17,4 +18,6 @@ public interface InStockDetailService {
 
 
     List<InStockDetail> batchSave(List<InStockDetail> inStockDetails);
+
+    BigDecimal findInStockAmount(Long inStockId);
 }

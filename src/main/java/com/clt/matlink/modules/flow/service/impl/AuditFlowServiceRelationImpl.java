@@ -14,14 +14,10 @@ import com.clt.matlink.modules.flow.domain.entity.AuditFlow;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowDetail;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowDetailRelation;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
-import com.clt.matlink.modules.flow.domain.enums.MateriaAuditStatusEnum;
-import com.clt.matlink.modules.flow.domain.form.AuditFlowDetailForm;
-import com.clt.matlink.modules.flow.domain.form.AuditFlowDetailRelationForm;
-import com.clt.matlink.modules.flow.domain.form.AuditFlowForm;
-import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
-import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationForm;
-import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
+import com.clt.matlink.modules.enums.MateriaAuditStatusEnum;
+import com.clt.matlink.modules.flow.domain.form.*;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
+import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 import com.clt.matlink.modules.flow.mapper.AuditFlowRelationMapper;
 import com.clt.matlink.modules.flow.service.AuditFlowDetailRelationService;
 import com.clt.matlink.modules.flow.service.AuditFlowDetailService;
@@ -217,6 +213,82 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
         MaterialAuditRelationGenerateResult materialAuditRelationGenerateResult = new MaterialAuditRelationGenerateResult();
         materialAuditRelationGenerateResult.setAuditFlowRelation(auditFlowRelation);
         return materialAuditRelationGenerateResult;
+    }
+
+    @Override
+    public MaterialAuditRelationResult processAuditFlowRelation(MaterialAuditRelationParam vo) {
+        Long orderId = vo.getOrderId();
+        Integer auditStatus = vo.getAuditStatus();
+        if(vo.getOrderId()==null){
+            throw new ServiceException("orderId不能为空");
+        }
+        if(vo.getAuditStatus()==null){
+            throw new ServiceException("审批状态不能为空");
+        }
+        Long loginEmployeeId = LoginHelper.getLoginEmployeeId();
+        Employee loginEmployee = LoginHelper.getLoginEmployee();
+        Long departmentId = loginEmployee.getDepartmentId();
+        Long roleId = loginEmployee.getRoleId();
+        vo.setCurrentUserId(loginEmployeeId);
+        LambdaQueryWrapper<AuditFlowRelation> lqw = Wrappers.lambdaQuery();
+        lqw.eq(AuditFlowRelation::getOrderId, orderId);
+        AuditFlowRelation auditFlowRelation = auditFlowRelationMapper.selectOne(lqw);
+        if(auditFlowRelation==null){
+            throw new ServiceException("未找到对应的审批流程");
+        }
+        if(auditFlowRelation.getAuditStatus()!=MateriaAuditStatusEnum.AUDIT_BEING.getStatus()){
+            throw new ServiceException("当前审批流程已结束");
+        }
+        AuditFlowDetailRelationForm auditFlowDetailRelationForm = new AuditFlowDetailRelationForm();
+        auditFlowDetailRelationForm.setFlowId(auditFlowRelation.getId());
+        auditFlowDetailRelationForm.setLevel(auditFlowRelation.getCurrentAuditLevel());
+        auditFlowDetailRelationForm.setAuditStatus(MateriaAuditStatusEnum.AUDIT_BEING.getStatus());
+        List<AuditFlowDetailRelation> list = auditFlowDetailRelationService.list(auditFlowDetailRelationForm);
+        if(CollUtil.isEmpty( list)){
+            throw new ServiceException("未找到对应的审批流程步骤");
+        }
+        Date now = new Date();
+        AuditFlowDetailRelation auditFlowDetailRelation = list.get(0);
+        if (!auditFlowDetailRelation.getDeptId().equals(departmentId)){
+            throw new ServiceException("当前用户部门与当前审批部门不一致");
+        }
+        if (!auditFlowDetailRelation.getRoleId().equals(roleId)){
+            throw new ServiceException("当前用户角色与当前审批角色不一致");
+        }
+        auditFlowDetailRelation.setAuditStatus(auditStatus);
+        auditFlowDetailRelation.setAuditTime(now);
+        auditFlowDetailRelation.setAuditRemark(vo.getAuditRemark());
+        auditFlowDetailRelation.setUserId(loginEmployeeId);
+        if(auditStatus==MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()){
+            //审批通过
+            auditFlowDetailRelationForm.setFlowId(auditFlowRelation.getId());
+            auditFlowDetailRelationForm.setLevel(auditFlowRelation.getCurrentAuditLevel()+1);
+            auditFlowDetailRelationForm.setAuditStatus(MateriaAuditStatusEnum.AUDIT_AWAIT.getStatus());
+            //获取下一级审批步骤
+            List<AuditFlowDetailRelation> nextSteplist = auditFlowDetailRelationService.list(auditFlowDetailRelationForm);
+            if(CollUtil.isEmpty( nextSteplist)){
+                //没有下一级步骤，则流程结束
+                auditFlowRelation.setAuditStatus(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus());
+            }else{
+                //有下一级步骤，则流程继续
+                AuditFlowDetailRelation nextStep = nextSteplist.get(0);
+                nextStep.setAuditStatus(MateriaAuditStatusEnum.AUDIT_BEING.getStatus());
+                auditFlowDetailRelationService.save(nextStep);
+                auditFlowRelation.setCurrentAuditLevel(auditFlowRelation.getCurrentAuditLevel()+1);
+            }
+        }else{
+           //审批拒绝
+            auditFlowRelation.setAuditStatus(MateriaAuditStatusEnum.AUDIT_FAIL.getStatus());
+        }
+        auditFlowDetailRelationService.save(auditFlowDetailRelation);
+        auditFlowRelation.setAuditUserId(loginEmployeeId);
+        auditFlowRelation.setAuditTime(now);
+        this.save(auditFlowRelation);
+
+        MaterialAuditRelationResult auditRelationResult = new MaterialAuditRelationResult();
+        auditRelationResult.setFlowRelation(auditFlowRelation);
+        auditRelationResult.setAuditTime(now);
+        return auditRelationResult;
     }
 
     private LambdaQueryWrapper<AuditFlowRelation> getQueryWrapper(AuditFlowRelationForm auditFlowForm) {

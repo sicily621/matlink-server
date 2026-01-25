@@ -61,7 +61,7 @@ public class MaterialImageController {
      * 根据物料图片Ids查询物料图片列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<MaterialImage>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<MaterialImage>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(materialImageService.getByIds(ids));
     }
 

@@ -64,7 +64,7 @@ public class OutBoundApplyController {
      * 根据领用Ids查询领用列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<OutBoundApply>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<OutBoundApply>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(outBoundApplyService.getByIds(ids));
     }
 

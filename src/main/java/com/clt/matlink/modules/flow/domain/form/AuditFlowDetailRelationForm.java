@@ -12,4 +12,5 @@ public class AuditFlowDetailRelationForm extends PageQuery {
     private Long roleId;
     private Long userId;
     private Integer auditStatus;
+    private Integer level;
 }

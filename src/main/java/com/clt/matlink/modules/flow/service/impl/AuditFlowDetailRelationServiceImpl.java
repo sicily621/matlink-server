@@ -8,7 +8,7 @@ import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowDetailRelation;
-import com.clt.matlink.modules.flow.domain.enums.MateriaAuditStatusEnum;
+import com.clt.matlink.modules.enums.MateriaAuditStatusEnum;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowDetailRelationForm;
 import com.clt.matlink.modules.flow.mapper.AuditFlowDetailRelationMapper;
 import com.clt.matlink.modules.flow.service.AuditFlowDetailRelationService;
@@ -102,6 +102,7 @@ public class AuditFlowDetailRelationServiceImpl implements AuditFlowDetailRelati
         lqw.eq(form.getDeptId()!=null, AuditFlowDetailRelation::getDeptId, form.getDeptId());
         lqw.eq(form.getRoleId()!=null, AuditFlowDetailRelation::getRoleId, form.getRoleId());
         lqw.eq(form.getAuditStatus()!=null, AuditFlowDetailRelation::getAuditStatus, form.getAuditStatus());
+        lqw.eq(form.getLevel()!=null, AuditFlowDetailRelation::getLevel, form.getLevel());
         lqw.eq( AuditFlowDetailRelation::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }

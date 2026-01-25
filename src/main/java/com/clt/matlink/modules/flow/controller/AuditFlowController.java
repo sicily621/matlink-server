@@ -63,7 +63,7 @@ public class AuditFlowController {
      * 根据审批流程Ids查询审批流程列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<AuditFlow>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<AuditFlow>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(auditFlowService.getByIds(ids));
     }
 

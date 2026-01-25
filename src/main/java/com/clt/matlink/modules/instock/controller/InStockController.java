@@ -4,11 +4,13 @@ import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.domain.vo.Result;
 import com.clt.matlink.modules.base.common.domain.vo.MaterialVO;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.instock.domain.entity.InStock;
 import com.clt.matlink.modules.instock.domain.form.InStockForm;
 import com.clt.matlink.modules.instock.domain.form.InStockSaveParam;
 import com.clt.matlink.modules.instock.domain.vo.InStockVo;
 import com.clt.matlink.modules.instock.service.InStockService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,7 +60,7 @@ public class InStockController {
      * 根据入库Ids查询入库列表
      */
     @GetMapping("/getByIds/{ids}")
-    public Result<List<InStock>> getById(@PathVariable("ids") List<Long> ids){
+    public Result<List<InStock>> getByIds(@PathVariable("ids") List<Long> ids){
         return Result.success(inStockService.getByIds(ids));
     }
 
@@ -84,5 +86,15 @@ public class InStockController {
     @GetMapping("/page")
     public Result<PageInfo<InStockVo>> page(InStockForm inStockForm, PageQuery pageQuery){
         return Result.success(inStockService.page(inStockForm, pageQuery));
+    }
+
+    /**
+     * 入库审批
+     */
+    @PostMapping("/updateAuditStatus")
+    public Result<InStock> updateAuditStatus(
+            @RequestBody
+            MaterialAuditRelationParam generateParam) {
+        return Result.success(inStockService.updateAuditStatus(generateParam));
     }
 }

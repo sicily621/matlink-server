@@ -7,29 +7,36 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
+import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.common.security.LoginHelper;
+import com.clt.matlink.modules.enums.MateriaAuditStatusEnum;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
-import com.clt.matlink.modules.flow.domain.enums.MateriaAuditResourceTypeEnum;
+import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
+import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 import com.clt.matlink.modules.flow.service.AuditFlowRelationService;
 import com.clt.matlink.modules.instock.domain.entity.InStock;
 import com.clt.matlink.modules.instock.domain.form.InStockForm;
 import com.clt.matlink.modules.instock.domain.form.InStockSaveParam;
 import com.clt.matlink.modules.instock.domain.vo.InStockVo;
 import com.clt.matlink.modules.instock.mapper.InStockMapper;
+import com.clt.matlink.modules.instock.service.InStockDetailService;
 import com.clt.matlink.modules.instock.service.InStockService;
-import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 public class InStockServiceImpl implements InStockService {
     @Autowired
     private InStockMapper inStockMapper;
+    @Autowired
+    private InStockDetailService inStockDetailService;
     @Autowired
     private AuditFlowRelationService auditFlowRelationService;
     @Override
@@ -52,6 +59,10 @@ public class InStockServiceImpl implements InStockService {
             inStock.setAuditUserId(auditFlowRelation.getAuditUserId());
             inStockMapper.updateById(inStock);
             // TODO 是否直接入库
+            if(inStock.getIsDirect()==1 && auditFlowRelation.getAuditStatus()== MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()){
+
+
+            }
         }else{
             flag = inStockMapper.updateById(inStock);
         }
@@ -108,6 +119,8 @@ public class InStockServiceImpl implements InStockService {
             if (inStockVo.getInStockUserId().equals(userId)) {
                 inStockVo.setHasInStockAuth(true);//当前登陆人有入库权限
             }
+            BigDecimal total = inStockDetailService.findInStockAmount(inStockVo.getId());
+            inStockVo.setInStockAmount(total);
         }
         return tableDataInfo;
     }
@@ -118,6 +131,37 @@ public class InStockServiceImpl implements InStockService {
         List<Long> list = CollStreamUtil.toList(auditFlowDetails, InStock::getId);
         List<InStock> result = getByIds(list);
         return result;
+    }
+
+    @Override
+    public InStock updateAuditStatus(MaterialAuditRelationParam generateParam) {
+        InStock old = this.getById(generateParam.getOrderId());
+        if (old == null) {
+            throw new ServiceException("入库单不存在");
+        }
+        if (old.getStatus() != null &&  old.getStatus() == 2){
+            throw new ServiceException("入库单已作废");
+        }
+        if (old.getStatus() != null &&  old.getStatus() == 1){
+            throw new ServiceException("入库单已入库");
+        }
+
+        //处理审批
+        MaterialAuditRelationResult auditResult = auditFlowRelationService.processAuditFlowRelation(generateParam);
+        AuditFlowRelation flowRelation = auditResult.getFlowRelation();
+        // 更新审批状态
+        InStockSaveParam entity = new InStockSaveParam();
+        entity.setId(flowRelation.getOrderId());
+        entity.setStatus(flowRelation.getAuditStatus());
+        entity.setAuditTime(flowRelation.getAuditTime());
+        entity.setAuditUserId(generateParam.getCurrentUserId());
+        this.save(entity);
+        //审批通过
+        if (entity.getStatus().equals(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus())) {
+            // TODO 判断是否直接入库
+//            dealDirectInStock(entity.getId());
+        }
+        return this.getById(old.getId());
     }
 
     private LambdaQueryWrapper<InStock> getQueryWrapper(InStockForm form) {
