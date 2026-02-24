@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 审批流程
+ * 审批流程记录
  */
 @RequestMapping("/audit/flow/relation")
 @RestController
@@ -24,7 +24,7 @@ public class AuditFlowRelationController {
     private AuditFlowRelationService auditFlowService;
 
     /**
-     * 查询审批流程列表
+     * 查询审批流程记录列表
      */
     @GetMapping("/list")
     public Result<List<AuditFlowRelation>> list(AuditFlowRelationForm auditFlowForm){

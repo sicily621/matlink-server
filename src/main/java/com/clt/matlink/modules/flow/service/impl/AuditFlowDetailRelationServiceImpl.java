@@ -1,6 +1,7 @@
 package com.clt.matlink.modules.flow.service.impl;
 
 import cn.hutool.core.collection.CollStreamUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -96,12 +97,14 @@ public class AuditFlowDetailRelationServiceImpl implements AuditFlowDetailRelati
     private LambdaQueryWrapper<AuditFlowDetailRelation> getQueryWrapper(AuditFlowDetailRelationForm form) {
 
         LambdaQueryWrapper<AuditFlowDetailRelation> lqw = Wrappers.lambdaQuery();
+        lqw.eq(form.getOrderId()!=null, AuditFlowDetailRelation::getOrderId, form.getOrderId());
         lqw.eq(form.getFlowId()!=null, AuditFlowDetailRelation::getFlowId, form.getFlowId());
         lqw.eq(form.getType()!=null, AuditFlowDetailRelation::getType, form.getType());
         lqw.eq(form.getStockId()!=null, AuditFlowDetailRelation::getStockId, form.getStockId());
         lqw.eq(form.getDeptId()!=null, AuditFlowDetailRelation::getDeptId, form.getDeptId());
         lqw.eq(form.getRoleId()!=null, AuditFlowDetailRelation::getRoleId, form.getRoleId());
         lqw.eq(form.getAuditStatus()!=null, AuditFlowDetailRelation::getAuditStatus, form.getAuditStatus());
+        lqw.in(CollUtil.isNotEmpty(form.getAuditStatusList()), AuditFlowDetailRelation::getAuditStatus, form.getAuditStatusList());
         lqw.eq(form.getLevel()!=null, AuditFlowDetailRelation::getLevel, form.getLevel());
         lqw.eq( AuditFlowDetailRelation::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;

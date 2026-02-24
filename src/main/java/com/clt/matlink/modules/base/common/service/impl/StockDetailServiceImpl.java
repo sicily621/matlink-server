@@ -187,6 +187,7 @@ public class StockDetailServiceImpl implements StockDetailService {
                     newStockDetail.setCostPrice(inStockDetail.getPerPrice());
                     newStockDetail.setTotalCostPrice(inStockDetail.getInStockPrice());
                     stockDetailMapper.insert(newStockDetail);
+                    stockDetail = newStockDetail;
                 } else {
                     //更新库存详情记录
                     stockDetail.setCount(stockDetail.getCount().add(inStockDetail.getActualCount()));

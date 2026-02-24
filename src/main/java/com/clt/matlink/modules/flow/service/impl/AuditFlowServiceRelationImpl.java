@@ -236,7 +236,8 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
         if(auditFlowRelation==null){
             throw new ServiceException("未找到对应的审批流程");
         }
-        if(auditFlowRelation.getAuditStatus()!=MateriaAuditStatusEnum.AUDIT_BEING.getStatus()){
+        List<Integer>  validStatusList = Lists.newArrayList(MateriaAuditStatusEnum.AUDIT_BEING.getStatus(),MateriaAuditStatusEnum.AUDIT_AWAIT.getStatus());
+        if(!validStatusList.contains(auditFlowRelation.getAuditStatus())){
             throw new ServiceException("当前审批流程已结束");
         }
         AuditFlowDetailRelationForm auditFlowDetailRelationForm = new AuditFlowDetailRelationForm();
@@ -259,6 +260,7 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
         auditFlowDetailRelation.setAuditTime(now);
         auditFlowDetailRelation.setAuditRemark(vo.getAuditRemark());
         auditFlowDetailRelation.setUserId(loginEmployeeId);
+        auditFlowDetailRelation.setUserName(loginEmployee.getRealName());
         if(auditStatus==MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()){
             //审批通过
             auditFlowDetailRelationForm.setFlowId(auditFlowRelation.getId());

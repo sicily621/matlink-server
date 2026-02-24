@@ -152,12 +152,12 @@ public class InStockServiceImpl implements InStockService {
         // 更新审批状态
         InStockSaveParam entity = new InStockSaveParam();
         entity.setId(flowRelation.getOrderId());
-        entity.setStatus(flowRelation.getAuditStatus());
+        entity.setAuditStatus(flowRelation.getAuditStatus());
         entity.setAuditTime(flowRelation.getAuditTime());
         entity.setAuditUserId(generateParam.getCurrentUserId());
         this.save(entity);
         //审批通过
-        if (entity.getStatus().equals(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus())) {
+        if (entity.getAuditStatus().equals(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus())) {
             // TODO 判断是否直接入库
 //            dealDirectInStock(entity.getId());
         }
