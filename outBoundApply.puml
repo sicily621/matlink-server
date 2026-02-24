@@ -1,0 +1,70 @@
+@startuml
+skinparam classAttributeIconSize 0
+interface OutBoundApplyMapper {
+}
+class OutBoundApplyServiceImpl {
++ save(OutBoundApply):OutBoundApply
++ getById(Long):OutBoundApply
++ getByIds(List<Long>):List<OutBoundApply>
++ deleteById(Long):Boolean
++ list(OutBoundApplyForm):List<OutBoundApply>
++ page(OutBoundApplyForm,PageQuery):PageInfo<OutBoundApplyVo>
++ batchSave(List<OutBoundApply>):List<OutBoundApply>
+}
+
+class OutBoundApplyController {
++ create(OutBoundApply):OutBoundApply
++ update(OutBoundApply):OutBoundApply
++ batchUpdate(List<OutBoundApply>):List<OutBoundApply>
++ getById(Long):OutBoundApply
++ getByIds(List<Long>):List<OutBoundApply>
++ deleteById(Long):Void
++ list(OutBoundApplyForm):List<OutBoundApply>
++ page(OutBoundApplyForm,PageQuery):PageInfo<OutBoundApplyVo>
+}
+
+
+interface OutBoundApplyService {
++ save(OutBoundApply):OutBoundApply
++ getById(Long):OutBoundApply
++ getByIds(List<Long>):List<OutBoundApply>
++ deleteById(Long):Boolean
++ list(OutBoundApplyForm):List<OutBoundApply>
++ page(OutBoundApplyForm,PageQuery):PageInfo<OutBoundApplyVo>
++ batchSave(List<OutBoundApply>):List<OutBoundApply>
+}
+
+
+
+class OutBoundApply {
+- Long id
+- Long stockId
+- Long workorderId
+- String applyNo
+- Date applyTime
+- Long deptId
+- Long applyUserId
+- Integer auditStatus
+- Integer status
+- Long auditUserId
+- Date auditTime
+- String purpose
+- String description
+- Long createUserId
+}
+class BaseEntity {
+- Date createTime
+- Date updateTime
+- Integer delFlag
+}
+
+OutBoundApplyController ..> OutBoundApplyService
+OutBoundApplyController ..> OutBoundApply
+OutBoundApplyService <|.. OutBoundApplyServiceImpl
+BaseEntity <|-- OutBoundApply
+OutBoundApplyServiceImpl ..> OutBoundApplyMapper
+OutBoundApplyServiceImpl ..> OutBoundApply
+
+
+
+@enduml

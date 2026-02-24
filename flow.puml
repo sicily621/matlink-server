@@ -1,0 +1,63 @@
+@startuml
+skinparam classAttributeIconSize 0
+class AuditFlowController {
++ create(AuditFlow):AuditFlow
++ update(AuditFlow):AuditFlow
++ batchUpdate(List<AuditFlow>):List<AuditFlow>
++ getById(Long):AuditFlow
++ getByIds(List<Long>):List<AuditFlow>
++ deleteById(Long):Void
++ list(AuditFlowForm):List<AuditFlow>
++ page(AuditFlowForm,PageQuery):PageInfo<AuditFlow>
+}
+
+
+interface AuditFlowMapper {
+}
+class AuditFlow {
+- Long id
+- String title
+- Long stockId
+- Integer type
+- Long deptId
+- String remark
+- Integer enable
+- Long createUserId
+}
+
+interface AuditFlowService {
++ save(AuditFlow):AuditFlow
++ getById(Long):AuditFlow
++ getByCondition(AuditFlowForm):AuditFlow
++ getByIds(List<Long>)List<AuditFlow>
++ deleteById(Long):Boolean
++ list(AuditFlowForm):List<AuditFlow>
++ page(AuditFlowForm,PageQuery):PageInfo<AuditFlow>
++ batchSave(List<AuditFlow>):List<AuditFlow>
+}
+
+class AuditFlowServiceImpl {
++ save(AuditFlow):AuditFlow
++ getById(Long):AuditFlow
++ getByCondition(AuditFlowForm):AuditFlow
++ getByIds(List<Long>):List<AuditFlow>
++ deleteById(Long):Boolean
++ list(AuditFlowForm):List<AuditFlow>
++ page(AuditFlowForm,PageQuery):PageInfo<AuditFlow>
++ batchSave(List<AuditFlow>):List<AuditFlow>
+}
+
+class BaseEntity {
+- Date createTime
+- Date updateTime
+- Integer delFlag
+}
+
+
+AuditFlowController ..> AuditFlowService
+AuditFlowController ..> AuditFlow
+AuditFlowService <|.. AuditFlowServiceImpl
+BaseEntity <|-- AuditFlow
+AuditFlowServiceImpl ..> AuditFlowMapper
+AuditFlowServiceImpl ..> AuditFlow
+@enduml

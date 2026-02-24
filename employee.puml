@@ -1,0 +1,64 @@
+@startuml
+skinparam classAttributeIconSize 0
+class EmployeeController {
++ create(Employee):Employee
++ update(Employee):Employee
++ getById(Long):Employee
++ getByUsername(String):Employee
++ getByIds(List<Long>):List<Employee>
++ deleteById(Long):Void
++ page(EmployeeForm,PageQuery):PageInfo<Employee>
++ list(EmployeeForm):List<Employee>
+}
+
+interface EmployeeService {
++ save(Employee):Employee
++ getById(Long):Employee
++ deleteById(Long):boolean
++ page(EmployeeForm,PageQuery):PageInfo<Employee>
++ getByUsername(String):Employee
++ list(EmployeeForm):List<Employee>
++ getByIds(List<Long>):List<Employee>
+}
+
+interface EmployeeMapper {
+}
+
+
+class BaseEntity {
+- Date createTime
+- Date updateTime
+- Integer delFlag
+}
+class Employee {
+- Long id
+- String code
+- String username
+- String password
+- String realName
+- Long departmentId
+- Long roleId
+- Integer gender
+- String avatar
+- String position
+- String phone
+- String email
+- Integer status
+}
+
+class EmployeeServiceImpl {
++ save(Employee):Employee
++ getById(Long):Employee
++ getByUsername(String):Employee
++ list(EmployeeForm):List<Employee>
++ deleteById(Long):boolean
++ page(EmployeeForm,PageQuery):PageInfo<Employee>
++ getByIds(List<Long>):List<Employee>
+}
+EmployeeController ..> EmployeeService
+EmployeeController ..> Employee
+EmployeeService <|.. EmployeeServiceImpl
+BaseEntity <|-- Employee
+EmployeeServiceImpl ..> EmployeeMapper
+EmployeeServiceImpl ..> Employee
+@enduml

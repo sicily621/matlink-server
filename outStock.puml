@@ -1,0 +1,83 @@
+@startuml
+skinparam classAttributeIconSize 0
+interface OutStockService {
++ save():OutStock
++ getById(Long):OutStock
++ getByIds():List<OutStock>
++ deleteById():Boolean
++ list():List<OutStock>
++ page():PageInfo<OutStockVo>
++ batchSave():List<OutStock>
+}
+
+class OutStockController {
++ create():OutStock
++ update():OutStock
++ batchUpdate():List<OutStock>
++ getById():List<OutStock>
++ getByIds(List<Long>):List<OutStock>
++ deleteById(Long):Void
++ list(OutStockForm):List<OutStock>
++ page(OutStockForm,PageQuery):PageInfo<OutStockVo>
+}
+
+
+interface OutStockDetailService {
++ deleteByOutStockId():Boolean
++ list():List<OutStockDetail>
++ batchSave():List<OutStockDetail>
++ findOutStockAmount():BigDecimal
+}
+
+interface OutStockMapper {
+}
+class OutStockServiceImpl {
++ save():OutStock
++ getById():OutStock
++ getByIds():List<OutStock>
++ deleteById():Boolean
++ list():List<OutStock>
++ page():PageInfo<OutStockVo>
++ batchSave():List<OutStock>
+}
+
+
+class OutStock {
+- Long id
+- Long originOrderId
+- Long stockId
+- String outStockNo
+- Integer auditStatus
+- Integer status
+- Integer type
+- Long deptId
+- String description
+- Integer isDirect
+- Long outStockUserId
+- Date outStockTime
+- Long auditUserId
+- Date auditTime
+- Long createUserId
+}
+
+interface AuditFlowRelationService {
++ listAuditBeingOrderIdsByCurrentUser():List<Long>
++ generateAuditFlowRelation():MaterialAuditRelationGenerateResult
++ processAuditFlowRelation():MaterialAuditRelationResult
+}
+
+class BaseEntity {
+- Date createTime
+- Date updateTime
+- Integer delFlag
+}
+
+OutStockController ..> OutStockService
+OutStockController ..> OutStock
+OutStockService <|.. OutStockServiceImpl
+BaseEntity <|-- OutStock
+OutStockServiceImpl ..> OutStockMapper
+OutStockServiceImpl ..> OutStockDetailService
+OutStockServiceImpl ..> OutStock
+OutStockServiceImpl ..> AuditFlowRelationService
+@enduml

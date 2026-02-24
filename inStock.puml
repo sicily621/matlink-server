@@ -1,0 +1,89 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class InStockServiceImpl {
++  save():InStock
++  getById():InStock
++  getByIds():List<InStock>
++  deleteById():Boolean
++  list():List<InStock>
++  page():PageInfo<InStockVo>
++  batchSave():List<InStock>
++  updateAuditStatus():InStock
+}
+
+
+
+class InStock {
+- Long id
+- Long originOrderId
+- Long stockId
+- String inStockNo
+- Integer auditStatus
+- Integer status
+- Long supplyId
+- Integer type
+- String description
+- Integer isDirect
+- Long inStockUserId
+- Date inStockTime
+- Long auditUserId
+- Date auditTime
+- Long createUserId
+}
+
+interface AuditFlowRelationService {
++ listAuditBeingOrderIdsByCurrentUser():List<Long>
++ generateAuditFlowRelation():MaterialAuditRelationGenerateResult
++ processAuditFlowRelation():MaterialAuditRelationResult
+}
+
+class InStockController {
++ create():InStock
++ update():InStock
++ batchUpdate():List<InStock>
++ getById():InStock
++ getByIds():List<InStock>
++ deleteById():Void
++ list():List<InStock>
++ page():PageInfo<InStockVo>
++ updateAuditStatus():InStock
+}
+
+interface InStockDetailService {
++ deleteByInStockId():Boolean
++ list():List<InStockDetail>
++ batchSave():List<InStockDetail>
++ findInStockAmount():BigDecimal
+}
+interface InStockService {
++ save():InStock
++ getById():InStock
++ getByIds():List<InStock>
++ deleteById():Boolean
++ list():List<InStock>
++ page():PageInfo<InStockVo>
++ batchSave():List<InStock>
++ updateAuditStatus():InStock
+}
+
+class BaseEntity {
+- Date createTime
+- Date updateTime
+- Integer delFlag
+}
+
+interface InStockMapper{}
+
+InStockController ..> InStockService
+InStockController ..> InStock
+InStockService <|.. InStockServiceImpl
+BaseEntity <|-- InStock
+InStockServiceImpl ..> InStockDetailService
+InStockServiceImpl ..> InStock
+InStockServiceImpl ..> InStockMapper
+InStockServiceImpl ..> AuditFlowRelationService
+
+
+
+@enduml

@@ -1,0 +1,66 @@
+@startuml
+
+class PurchaseController {
++ create(Purchase):Purchase
++ update(Purchase):Purchase
++ batchUpdate(List<Purchase>):List<Purchase>
++ getById(Long):Purchase
++ getByIds(List<Long>):List<Purchase>
++ deleteById(Long):Void
++ list(PurchaseForm):List<Purchase>
++ page(PurchaseForm,PageQuery):PageInfo<PurchaseVo>
+}
+
+
+class Purchase {
+- Long id
+- String billNo
+- Long stockId
+- Long applyUserId
+- Long deptId
+- Date applyDate
+- Integer auditStatus
+- Integer status
+- Long createUserId
+- String description
+- Long auditUserId
+- Date auditTime
+}
+
+class PurchaseServiceImpl {
++ save(Purchase):Purchase
++ getById(Long):Purchase
++ getByIds(List<Long>):List<Purchase>
++ deleteById(Long):Boolean
++ list(PurchaseForm):List<Purchase>
++ page(PurchaseForm,PageQuery):PageInfo<PurchaseVo>
++ batchSave(List<Purchase>):List<Purchase>
+}
+
+
+interface PurchaseService {
++ Purchase save(Purchase)
++ Purchase getById(Long)
++ getByIds(List<Long>):List<Purchase>
++ deleteById(Long):Boolean
++ list(PurchaseForm):List<Purchase>
++ page(PurchaseForm,PageQuery):PageInfo<PurchaseVo>
++ batchSave(List<Purchase>):List<Purchase>
+}
+
+interface PurchaseMapper {
+}
+class BaseEntity {
+- Date createTime
+- Date updateTime
+- Integer delFlag
+}
+
+PurchaseController ..> PurchaseService
+PurchaseController ..> Purchase
+PurchaseService <|.. PurchaseServiceImpl
+BaseEntity <|-- Purchase
+PurchaseServiceImpl ..> PurchaseMapper
+PurchaseServiceImpl ..> Purchase
+
+@enduml
