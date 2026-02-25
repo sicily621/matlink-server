@@ -29,6 +29,7 @@ import com.clt.matlink.modules.system.role.service.RoleService;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -110,6 +111,9 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
         List<AuditFlowDetailRelation> auditFlowDetailRelations = auditFlowDetailRelationService.listAuditBeingDetail(auditFlowDetailRelationForm);
 
         List<Long> flowIds = CollStreamUtil.toList(auditFlowDetailRelations, AuditFlowDetailRelation::getFlowId);
+        if(CollUtil.isEmpty(flowIds)){
+            flowIds.add(-1L);
+        }
         AuditFlowRelationForm auditFlowRelationForm = new AuditFlowRelationForm();
         auditFlowRelationForm.setIds(flowIds);
         auditFlowRelationForm.setAuditStatusList(Lists.newArrayList(MateriaAuditStatusEnum.AUDIT_AWAIT.getStatus(), MateriaAuditStatusEnum.AUDIT_BEING.getStatus()));
@@ -143,6 +147,7 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public MaterialAuditRelationGenerateResult generateAuditFlowRelation(MaterialAuditRelationGenerateParam generateParam) {
         AuditFlowForm auditFlowForm = new AuditFlowForm();
         auditFlowForm.setDeptId(generateParam.getDeptId());
@@ -202,6 +207,8 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
                 auditFlowDetailRelation.setDeptId(auditFlowDetail.getDeptId());
                 auditFlowDetailRelation.setRoleId(auditFlowDetail.getRoleId());
                 auditFlowDetailRelation.setRoleName(auditFlowDetail.getRoleName());
+                auditFlowDetailRelation.setUserId(auditFlowDetail.getUserId());
+                auditFlowDetailRelation.setUserName(employeeService.getById(auditFlowDetail.getUserId()).getRealName());
                 auditFlowDetailRelation.setAuditRemark("");
                 auditFlowDetailRelation.setAuditStatus(MateriaAuditStatusEnum.AUDIT_AWAIT.getStatus());
                 auditFlowDetails.add(auditFlowDetailRelation);
@@ -216,6 +223,7 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public MaterialAuditRelationResult processAuditFlowRelation(MaterialAuditRelationParam vo) {
         Long orderId = vo.getOrderId();
         Integer auditStatus = vo.getAuditStatus();
@@ -277,6 +285,7 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
                 nextStep.setAuditStatus(MateriaAuditStatusEnum.AUDIT_BEING.getStatus());
                 auditFlowDetailRelationService.save(nextStep);
                 auditFlowRelation.setCurrentAuditLevel(auditFlowRelation.getCurrentAuditLevel()+1);
+                auditFlowRelation.setAuditStatus(MateriaAuditStatusEnum.AUDIT_BEING.getStatus());
             }
         }else{
            //审批拒绝

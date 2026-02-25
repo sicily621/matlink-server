@@ -28,6 +28,7 @@ import com.clt.matlink.modules.outstock.domain.entity.OutStock;
 import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
     @Autowired
     private AuditFlowRelationService auditFlowRelationService;
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public OutBoundApply save(OutBoundApply outBoundApply) {
         int flag = 0;
         if(outBoundApply.getId()==null){
@@ -138,6 +140,7 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
         return lqw;
     }
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public OutBoundApply updateAuditStatus(MaterialAuditRelationParam generateParam) {
         OutBoundApply old = this.getById(generateParam.getOrderId());
         if (old == null) {
