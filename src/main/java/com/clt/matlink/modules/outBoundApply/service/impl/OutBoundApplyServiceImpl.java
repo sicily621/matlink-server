@@ -7,18 +7,25 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
+import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.common.security.LoginHelper;
+import com.clt.matlink.modules.enums.MateriaAuditStatusEnum;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
 import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
+import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 import com.clt.matlink.modules.flow.service.AuditFlowRelationService;
 import com.clt.matlink.modules.outBoundApply.domain.entity.OutBoundApply;
 import com.clt.matlink.modules.outBoundApply.domain.form.OutBoundApplyForm;
+import com.clt.matlink.modules.outBoundApply.domain.form.OutBoundApplySaveForm;
 import com.clt.matlink.modules.outBoundApply.domain.vo.OutBoundApplyVo;
 import com.clt.matlink.modules.outBoundApply.mapper.OutBoundApplyMapper;
 import com.clt.matlink.modules.outBoundApply.service.OutBoundApplyService;
+import com.clt.matlink.modules.outstock.domain.entity.OutStock;
+import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -130,5 +137,34 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
         lqw.eq( OutBoundApply::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }
+    @Override
+    public OutBoundApply updateAuditStatus(MaterialAuditRelationParam generateParam) {
+        OutBoundApply old = this.getById(generateParam.getOrderId());
+        if (old == null) {
+            throw new ServiceException("领用单不存在");
+        }
+        if (old.getStatus() != null &&  old.getStatus() == 2){
+            throw new ServiceException("领用单已作废");
+        }
+        if (old.getStatus() != null &&  old.getStatus() == 1){
+            throw new ServiceException("领用单已出库");
+        }
 
+        //处理审批
+        MaterialAuditRelationResult auditResult = auditFlowRelationService.processAuditFlowRelation(generateParam);
+        AuditFlowRelation flowRelation = auditResult.getFlowRelation();
+        // 更新审批状态
+        OutBoundApplySaveForm entity = new OutBoundApplySaveForm();
+        entity.setId(flowRelation.getOrderId());
+        entity.setAuditStatus(flowRelation.getAuditStatus());
+        entity.setAuditTime(flowRelation.getAuditTime());
+        entity.setAuditUserId(generateParam.getCurrentUserId());
+        this.save(entity);
+        //审批通过
+        if (entity.getAuditStatus().equals(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus())) {
+            // TODO 判断是否直接出库
+//            dealDirectInStock(entity.getId());
+        }
+        return this.getById(old.getId());
+    }
 }

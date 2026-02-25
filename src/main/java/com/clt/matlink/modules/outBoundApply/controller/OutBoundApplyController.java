@@ -3,10 +3,12 @@ package com.clt.matlink.modules.outBoundApply.controller;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.domain.vo.Result;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.outBoundApply.domain.entity.OutBoundApply;
 import com.clt.matlink.modules.outBoundApply.domain.form.OutBoundApplyForm;
 import com.clt.matlink.modules.outBoundApply.domain.vo.OutBoundApplyVo;
 import com.clt.matlink.modules.outBoundApply.service.OutBoundApplyService;
+import com.clt.matlink.modules.outstock.domain.entity.OutStock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -90,5 +92,14 @@ public class OutBoundApplyController {
     @GetMapping("/page")
     public Result<PageInfo<OutBoundApplyVo>> page(OutBoundApplyForm inStockForm, PageQuery pageQuery){
         return Result.success(outBoundApplyService.page(inStockForm, pageQuery));
+    }
+    /**
+     * 领用审批
+     */
+    @PostMapping("/updateAuditStatus")
+    public Result<OutBoundApply> updateAuditStatus(
+            @RequestBody
+            MaterialAuditRelationParam generateParam) {
+        return Result.success(outBoundApplyService.updateAuditStatus(generateParam));
     }
 }

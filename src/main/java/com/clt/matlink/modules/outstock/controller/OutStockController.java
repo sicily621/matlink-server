@@ -3,6 +3,9 @@ package com.clt.matlink.modules.outstock.controller;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.domain.vo.Result;
+import com.clt.matlink.modules.base.common.domain.entity.Stock;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
+import com.clt.matlink.modules.instock.domain.entity.InStock;
 import com.clt.matlink.modules.outstock.domain.entity.OutStock;
 import com.clt.matlink.modules.outstock.domain.form.OutStockForm;
 import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
@@ -83,5 +86,14 @@ public class OutStockController {
     @GetMapping("/page")
     public Result<PageInfo<OutStockVo>> page(OutStockForm inStockForm, PageQuery pageQuery){
         return Result.success(outStockService.page(inStockForm, pageQuery));
+    }
+    /**
+     * 入库审批
+     */
+    @PostMapping("/updateAuditStatus")
+    public Result<OutStock> updateAuditStatus(
+            @RequestBody
+            MaterialAuditRelationParam generateParam) {
+        return Result.success(outStockService.updateAuditStatus(generateParam));
     }
 }

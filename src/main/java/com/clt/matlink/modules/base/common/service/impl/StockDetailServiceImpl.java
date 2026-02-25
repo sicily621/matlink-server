@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -110,7 +111,7 @@ public class StockDetailServiceImpl implements StockDetailService {
                                         outStockDetail.getStockId(), outStockDetail.getMaterialId(),
                                         outStockDetail.getActualCount(), stockDetail.getCount()));
                     }
-                    BigDecimal useCount = stockDetail.getUseCount().add(outStockDetail.getActualCount());
+                    BigDecimal useCount = stockDetail.getUseCount().subtract(outStockDetail.getActualCount());
                     if(useCount.compareTo(BigDecimal.ZERO)<0){
                         throw new ServiceException(
                                 StrUtil.format("物料库存可用数量不足,stockId={},materialId={},出库数量={},库存数量={}",
@@ -273,6 +274,7 @@ public class StockDetailServiceImpl implements StockDetailService {
         lqw.eq(stockDetailForm.getStockId() != null, StockDetail::getStockId, stockDetailForm.getStockId());
         lqw.eq(stockDetailForm.getMaterialId() != null, StockDetail::getMaterialId, stockDetailForm.getMaterialId());
         lqw.eq(stockDetailForm.getMaterialTypeId() != null, StockDetail::getMaterialTypeId, stockDetailForm.getMaterialTypeId());
+        lqw.in(CollUtil.isNotEmpty(stockDetailForm.getMaterialIds()) , StockDetail::getMaterialId, stockDetailForm.getMaterialIds());
         lqw.eq(StockDetail::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }
