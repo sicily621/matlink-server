@@ -1,14 +1,22 @@
-package com.clt.matlink.modules.outBoundApply.domain.vo;
+package com.clt.matlink.modules.task.domain.vo;
 
-import com.clt.matlink.modules.outBoundApply.domain.entity.OutBoundApply;
-import com.clt.matlink.modules.purchase.domain.entity.Purchase;
+import com.clt.matlink.modules.task.domain.entity.Task;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.Date;
+
+/**
+ *
+ * 物料管理-盘点任务表Vo
+ */
 @Data
-public class OutBoundApplyVo extends OutBoundApply {
+@Schema(description = "物料管理-盘点任务表")
+public class TaskVo extends Task {
+
     @Schema(description = "当前登陆人是否有权限审批")
     private Boolean hasAuditAuth = false;
     @Schema(description = "当前登陆人是否有权限申领出库")
     private Boolean hasApplyAuth = false;
+
 }

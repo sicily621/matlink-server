@@ -7,15 +7,22 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
+import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.common.security.LoginHelper;
+import com.clt.matlink.modules.enums.MateriaAuditStatusEnum;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
 import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
+import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 import com.clt.matlink.modules.flow.service.AuditFlowRelationService;
+import com.clt.matlink.modules.outstock.domain.entity.OutStock;
+import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
 import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import com.clt.matlink.modules.purchase.domain.form.PurchaseForm;
+import com.clt.matlink.modules.purchase.domain.form.PurchaseSaveParam;
 import com.clt.matlink.modules.purchase.domain.vo.PurchaseVo;
 import com.clt.matlink.modules.purchase.mapper.PurchaseMapper;
 import com.clt.matlink.modules.purchase.service.PurchaseService;
@@ -116,6 +123,36 @@ public class PurchaseServiceImpl implements PurchaseService {
         List<Long> list = CollStreamUtil.toList(auditFlowDetails, Purchase::getId);
         List<Purchase> result = getByIds(list);
         return result;
+    }
+    @Override
+    public Purchase updateAuditStatus(MaterialAuditRelationParam generateParam) {
+        Purchase old = this.getById(generateParam.getOrderId());
+        if (old == null) {
+            throw new ServiceException("采购单不存在");
+        }
+        if (old.getStatus() != null &&  old.getStatus() == 2){
+            throw new ServiceException("采购单已作废");
+        }
+        if (old.getStatus() != null &&  old.getStatus() == 1){
+            throw new ServiceException("采购单已出库");
+        }
+
+        //处理审批
+        MaterialAuditRelationResult auditResult = auditFlowRelationService.processAuditFlowRelation(generateParam);
+        AuditFlowRelation flowRelation = auditResult.getFlowRelation();
+        // 更新审批状态
+        PurchaseSaveParam entity = new PurchaseSaveParam();
+        entity.setId(flowRelation.getOrderId());
+        entity.setAuditStatus(flowRelation.getAuditStatus());
+        entity.setAuditTime(flowRelation.getAuditTime());
+        entity.setAuditUserId(generateParam.getCurrentUserId());
+        this.save(entity);
+        //审批通过
+        if (entity.getAuditStatus().equals(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus())) {
+            // TODO 判断是否直接入库
+//            dealDirectInStock(entity.getId());
+        }
+        return this.getById(old.getId());
     }
 
     private LambdaQueryWrapper<Purchase> getQueryWrapper(PurchaseForm form) {

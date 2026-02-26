@@ -113,7 +113,7 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
                 outBoundApplyVo.setHasAuditAuth(true);//当前登陆人有待审批
             }
             if (outBoundApplyVo.getApplyUserId().equals(userId)) {
-                outBoundApplyVo.setHasInStockAuth(true);//当前登陆人有入库权限
+                outBoundApplyVo.setHasApplyAuth(true);//当前登陆人有领用权限
             }
         }
         return tableDataInfo;

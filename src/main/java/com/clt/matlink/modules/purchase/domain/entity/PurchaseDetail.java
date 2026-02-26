@@ -12,15 +12,9 @@ import java.util.Date;
 public class PurchaseDetail extends BaseEntity {
     private Long id;
     private Long billId;
-    private Long materialTypeId;
     private Long materialId;
     private BigDecimal count;
-    private String brand;
-    private String modelNo;
     private BigDecimal perPrice;
     private BigDecimal totalPrice;
     private Long supplierId;
-    private Date deliveryDate;
-    private String description;
-    private String filePath;
 }

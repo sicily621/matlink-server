@@ -3,6 +3,8 @@ package com.clt.matlink.modules.purchase.controller;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.domain.vo.Result;
+import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
+import com.clt.matlink.modules.outstock.domain.entity.OutStock;
 import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import com.clt.matlink.modules.purchase.domain.form.PurchaseForm;
 import com.clt.matlink.modules.purchase.domain.vo.PurchaseVo;
@@ -90,5 +92,14 @@ public class PurchaseController {
     @GetMapping("/page")
     public Result<PageInfo<PurchaseVo>> page(PurchaseForm inStockForm, PageQuery pageQuery){
         return Result.success(purchaseService.page(inStockForm, pageQuery));
+    }
+    /**
+     * 采购审批
+     */
+    @PostMapping("/updateAuditStatus")
+    public Result<Purchase> updateAuditStatus(
+            @RequestBody
+            MaterialAuditRelationParam generateParam) {
+        return Result.success(purchaseService.updateAuditStatus(generateParam));
     }
 }
