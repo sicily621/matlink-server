@@ -86,7 +86,7 @@ public class TaskDetailServiceImpl implements TaskDetailService {
 
     private LambdaQueryWrapper<TaskDetail> getQueryWrapper(TaskDetailForm form) {
         LambdaQueryWrapper<TaskDetail> lqw = Wrappers.lambdaQuery();
-        lqw.eq(form.getTaskId()!=null, TaskDetail::getId, form.getTaskId());
+        lqw.eq(form.getTaskId()!=null, TaskDetail::getTaskId, form.getTaskId());
         lqw.eq(TaskDetail::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }
