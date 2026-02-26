@@ -151,7 +151,7 @@ public class TaskServiceImpl implements TaskService {
             throw new ServiceException("盘点任务已作废");
         }
         if (old.getStatus() != null &&  old.getStatus() == 1){
-            throw new ServiceException("盘点任务已出库");
+            throw new ServiceException("盘点任务已盘盈或盘亏");
         }
 
         //处理审批
