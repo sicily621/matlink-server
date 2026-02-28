@@ -9,6 +9,7 @@ import com.clt.matlink.modules.base.common.domain.entity.StockRecord;
 import com.clt.matlink.modules.base.common.domain.form.StockRecordForm;
 import com.clt.matlink.modules.base.common.mapper.StockRecordMapper;
 import com.clt.matlink.modules.base.common.service.StockRecordService;
+import com.clt.matlink.modules.outstock.domain.entity.OutStock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -72,6 +73,8 @@ public class StockRecordServiceImpl implements StockRecordService {
         lqw.eq(stockRecordForm.getMaterialId()!=null, StockRecord::getMaterialId, stockRecordForm.getMaterialId());
         lqw.eq(stockRecordForm.getType()!=null, StockRecord::getType, stockRecordForm.getType());
         lqw.eq(stockRecordForm.getRelatedOrderId()!=null, StockRecord::getRelatedOrderId, stockRecordForm.getRelatedOrderId());
+        lqw.ge(stockRecordForm.getStartTime()!=null, StockRecord::getHandleTime, stockRecordForm.getStartTime());
+        lqw.le(stockRecordForm.getEndTime()!=null, StockRecord::getHandleTime, stockRecordForm.getEndTime());
         lqw.eq( StockRecord::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }

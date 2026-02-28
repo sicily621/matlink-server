@@ -19,7 +19,4 @@ public class OutStockDetail extends BaseEntity {
     private BigDecimal priceRatio;
     private BigDecimal actualCount;
     private BigDecimal expectedCount;
-    private String description;
-    private String invoiceNumber;
-    private Long invoiceTime;
 }

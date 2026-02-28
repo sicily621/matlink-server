@@ -19,8 +19,4 @@ public class InStockDetail  extends BaseEntity {
     private BigDecimal priceRatio;
     private BigDecimal actualCount;
     private BigDecimal expectedCount;
-    private String description;
-    private String invoiceNumber;
-    private Long invoiceTime;
-    private String photos;
 }
