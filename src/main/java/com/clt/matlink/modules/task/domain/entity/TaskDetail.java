@@ -25,6 +25,10 @@ public class TaskDetail extends BaseEntity {
     private Long materialId;
     @Schema(description = "实际数量")
     private BigDecimal realCount;
+    @Schema(description = "账面库存数量")
+    private BigDecimal bookCount;
+    @Schema(description = "差异数量")
+    private BigDecimal diffCount;
     @Schema(description = "状态：0 正常 1盘盈 2盘亏")
     private Integer status;
 }

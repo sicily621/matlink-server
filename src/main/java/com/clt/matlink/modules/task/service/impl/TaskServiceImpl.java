@@ -10,6 +10,8 @@ import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.common.security.LoginHelper;
+import com.clt.matlink.modules.base.common.domain.form.StockSaveParam;
+import com.clt.matlink.modules.base.common.service.StockDetailService;
 import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
 import com.clt.matlink.modules.enums.MateriaAuditStatusEnum;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
@@ -19,12 +21,16 @@ import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 import com.clt.matlink.modules.flow.service.AuditFlowRelationService;
+import com.clt.matlink.modules.system.employee.service.EmployeeService;
 import com.clt.matlink.modules.task.domain.entity.Task;
+import com.clt.matlink.modules.task.domain.entity.TaskDetail;
+import com.clt.matlink.modules.task.domain.form.TaskDetailForm;
 import com.clt.matlink.modules.task.domain.form.TaskSaveForm;
 import com.clt.matlink.modules.task.domain.vo.TaskVo;
 import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import com.clt.matlink.modules.task.domain.form.TaskForm;
 import com.clt.matlink.modules.task.mapper.TaskMapper;
+import com.clt.matlink.modules.task.service.TaskDetailService;
 import com.clt.matlink.modules.task.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,19 +45,22 @@ public class TaskServiceImpl implements TaskService {
     private TaskMapper taskMapper;
     @Autowired
     private AuditFlowRelationService auditFlowRelationService;
-
+    @Autowired
+    private EmployeeService employeeService;
+    @Autowired
+    private StockDetailService stockDetailService;
     @Override
     public Task save(Task task) {
         int flag = 0;
         if(task.getId()==null){
             //生成审批流
             flag= taskMapper.insert(task);
-            Employee currentUser = LoginHelper.getLoginEmployee();
+            Employee handleUser = employeeService.getById(task.getHandleUserId());
             MaterialAuditRelationGenerateParam generateParam = new MaterialAuditRelationGenerateParam();
             generateParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_INVENTORY.getValue());
             generateParam.setStockId(task.getStockId());
             generateParam.setOrderId(task.getId());
-            generateParam.setDeptId(currentUser.getDepartmentId());
+            generateParam.setDeptId(handleUser.getDepartmentId());
             MaterialAuditRelationGenerateResult generateResult = auditFlowRelationService.generateAuditFlowRelation(generateParam);
             AuditFlowRelation auditFlowRelation = generateResult.getAuditFlowRelation();
             task.setAuditStatus(auditFlowRelation.getAuditStatus());
@@ -147,11 +156,8 @@ public class TaskServiceImpl implements TaskService {
         if (old == null) {
             throw new ServiceException("盘点任务不存在");
         }
-        if (old.getStatus() != null &&  old.getStatus() == 2){
+        if (old.getStatus() != null &&  old.getStatus() == 3){
             throw new ServiceException("盘点任务已作废");
-        }
-        if (old.getStatus() != null &&  old.getStatus() == 1){
-            throw new ServiceException("盘点任务已盘盈或盘亏");
         }
 
         //处理审批
@@ -166,9 +172,13 @@ public class TaskServiceImpl implements TaskService {
         this.save(entity);
         //审批通过
         if (entity.getAuditStatus().equals(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus())) {
-            // TODO 判断是否直接出库
-//            dealDirectInStock(entity.getId());
+            // 更新盘点物料库存数据
+            StockSaveParam stockSaveParam = new StockSaveParam();
+            stockSaveParam.setOrderId(generateParam.getOrderId());
+            stockSaveParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_INVENTORY.getValue());
+            stockDetailService.save(stockSaveParam);
         }
         return this.getById(old.getId());
     }
+
 }

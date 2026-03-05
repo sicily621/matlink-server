@@ -40,6 +40,11 @@ import com.clt.matlink.modules.outstock.service.OutStockDetailService;
 import com.clt.matlink.modules.outstock.service.OutStockService;
 import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import com.clt.matlink.modules.purchase.service.PurchaseService;
+import com.clt.matlink.modules.task.domain.entity.Task;
+import com.clt.matlink.modules.task.domain.entity.TaskDetail;
+import com.clt.matlink.modules.task.domain.form.TaskDetailForm;
+import com.clt.matlink.modules.task.service.TaskDetailService;
+import com.clt.matlink.modules.task.service.TaskService;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,6 +71,10 @@ public class StockDetailServiceImpl implements StockDetailService {
     private PurchaseService purchaseService;
     @Autowired
     private OutBoundApplyService outBoundApplyService;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private TaskDetailService taskDetailService;
 
     @Override
     public List<StockDetail> save(StockSaveParam stockSaveParam) {
@@ -75,7 +84,9 @@ public class StockDetailServiceImpl implements StockDetailService {
             return handleInStock(orderId);
         } else if (type.equals(MateriaAuditResourceTypeEnum.MATERIAL_OUT_STOCK.getValue())) {
             return handleOutStock(orderId);
-        } else {
+        } else if(type.equals(MateriaAuditResourceTypeEnum.MATERIAL_INVENTORY.getValue())){
+            return handleTask(orderId);
+        }else {
             throw new ServiceException("未知的审核资源类型");
         }
     }
@@ -228,7 +239,54 @@ public class StockDetailServiceImpl implements StockDetailService {
         }
         return stockDetails;
     }
+    /**
+     * 盘点处理
+     *
+     * @param orderId
+     * @return
+     */
+    private List<StockDetail> handleTask(Long orderId) {
+        Task task = taskService.getById(orderId);
+        List<StockDetail> stockDetails = Lists.newArrayList();
+        if (task.getAuditStatus() == MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()) {
+            TaskDetailForm taskDetailForm = new TaskDetailForm();
+            taskDetailForm.setTaskId(orderId);
+            List<TaskDetail> taskDetails = taskDetailService.list(taskDetailForm);
+            for (TaskDetail taskDetail : taskDetails) {
+                StockDetailForm stockDetailForm = new StockDetailForm();
+                stockDetailForm.setMaterialId(taskDetail.getMaterialId());
+                stockDetailForm.setStockId(task.getStockId());
+                StockDetail stockDetail = this.getByConditions(stockDetailForm);
+                Material material = materialService.getById(taskDetail.getMaterialId());
+                if (stockDetail == null) {
+                    throw new ServiceException("盘点物料不存在");
 
+                } else {
+                    //更新库存详情记录
+                    stockDetail.setCount(taskDetail.getRealCount());
+                    stockDetail.setUseCount(taskDetail.getRealCount());
+                    stockDetail.setStockTime(new Date());
+                    stockDetailMapper.updateById(stockDetail);
+                }
+                //库存流水
+                StockRecord stockRecord = new StockRecord();
+                stockRecord.setType(MateriaAuditResourceTypeEnum.MATERIAL_INVENTORY.getValue());
+                stockRecord.setRelatedOrderId(taskDetail.getTaskId());
+                stockRecord.setMaterialId(taskDetail.getMaterialId());
+                stockRecord.setStockId(task.getStockId());
+                stockRecord.setQuantityChange(taskDetail.getDiffCount());
+                stockRecord.setBalanceAfter(stockDetail.getCount());
+                stockRecord.setCostPrice(stockDetail.getCostPrice());
+                stockRecord.setTotalCostPrice(stockDetail.getTotalCostPrice());
+                stockRecord.setHandleUserId(LoginHelper.getLoginEmployeeId());
+                stockRecord.setHandleTime(new Date());
+                stockRecordService.save(stockRecord);
+                stockDetails.add(stockDetail);
+            }
+        }
+
+        return stockDetails;
+    }
     @Override
     public StockDetail getById(Long id) {
         return stockDetailMapper.selectById(id);
