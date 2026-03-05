@@ -141,7 +141,7 @@ public class StockDetailServiceImpl implements StockDetailService {
                 stockRecord.setRelatedOrderId(outStockDetail.getOutStockId());
                 stockRecord.setMaterialId(outStockDetail.getMaterialId());
                 stockRecord.setStockId(outStockDetail.getStockId());
-                stockRecord.setQuantityChange(outStockDetail.getActualCount());
+                stockRecord.setQuantityChange(outStockDetail.getActualCount().negate());
                 stockRecord.setBalanceAfter(stockDetail.getCount());
                 stockRecord.setCostPrice(stockDetail.getCostPrice());
                 stockRecord.setTotalCostPrice(stockDetail.getTotalCostPrice());
