@@ -23,9 +23,7 @@ public class Material extends BaseEntity {
         private Integer minCountLimit;
         private Integer maxCountLimit;
         private Integer safeCountLimit;
-        private BigDecimal suggestedCostPrice;
-        private BigDecimal suggestedPurchasePrice;
+        private BigDecimal standardCost;
         private Integer status;
-        private String barcode;
         private Long createUserId;
 }

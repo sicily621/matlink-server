@@ -1,6 +1,7 @@
 package com.clt.matlink.modules.base.common.service.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -39,6 +40,9 @@ import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
 import com.clt.matlink.modules.outstock.service.OutStockDetailService;
 import com.clt.matlink.modules.outstock.service.OutStockService;
 import com.clt.matlink.modules.purchase.domain.entity.Purchase;
+import com.clt.matlink.modules.purchase.domain.entity.PurchaseDetail;
+import com.clt.matlink.modules.purchase.domain.form.PurchaseDetailForm;
+import com.clt.matlink.modules.purchase.service.PurchaseDetailService;
 import com.clt.matlink.modules.purchase.service.PurchaseService;
 import com.clt.matlink.modules.task.domain.entity.Task;
 import com.clt.matlink.modules.task.domain.entity.TaskDetail;
@@ -75,6 +79,8 @@ public class StockDetailServiceImpl implements StockDetailService {
     private TaskService taskService;
     @Autowired
     private TaskDetailService taskDetailService;
+    @Autowired
+    private PurchaseDetailService purchaseDetailService;
 
     @Override
     public List<StockDetail> save(StockSaveParam stockSaveParam) {
@@ -114,6 +120,13 @@ public class StockDetailServiceImpl implements StockDetailService {
                             StrUtil.format("出库物料不存在,stockId={},materialId={}",
                                     outStockDetail.getStockId(), outStockDetail.getMaterialId()));
                 } else {
+                    //采购退货出库，重新核算成本
+                    if(outStock.getType().equals(2)){
+                        // 新成本单价=（原成本单价*原库存数量-出库单价*出库数量）/ 剩余库存数量
+                        BigDecimal inventoryAmount = stockDetail.getCostPrice().multiply(stockDetail.getCount()).subtract(outStockDetail.getPerPrice().multiply(outStockDetail.getActualCount()));
+                        BigDecimal inventoryCount = stockDetail.getCount().subtract(outStockDetail.getActualCount());
+                        stockDetail.setCostPrice(inventoryAmount.divide(inventoryCount,2, RoundingMode.HALF_UP));
+                    }
                     //更新库存详情记录
                     BigDecimal count = stockDetail.getCount().subtract(outStockDetail.getActualCount());
                     if(count.compareTo(BigDecimal.ZERO)<0){
@@ -129,10 +142,11 @@ public class StockDetailServiceImpl implements StockDetailService {
                                         outStockDetail.getStockId(), outStockDetail.getMaterialId(),
                                         outStockDetail.getActualCount(), stockDetail.getUseCount()));
                     }
+
                     stockDetail.setCount(count);
                     stockDetail.setUseCount(useCount);
                     stockDetail.setStockTime(new Date());
-                    stockDetail.setTotalCostPrice(stockDetail.getTotalCostPrice().subtract(outStockDetail.getOutStockPrice()));
+                    stockDetail.setTotalCostPrice(stockDetail.getCount().multiply(stockDetail.getCostPrice()));
                     stockDetailMapper.updateById(stockDetail);
                 }
                 //库存流水
@@ -175,6 +189,7 @@ public class StockDetailServiceImpl implements StockDetailService {
     private List<StockDetail> handleInStock(Long orderId) {
         InStock inStock = inStockService.getById(orderId);
         List<StockDetail> stockDetails = Lists.newArrayList();
+        //入库单 审批通过
         if (inStock.getAuditStatus() == MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()) {
             InStockDetailForm inStockDetailForm = new InStockDetailForm();
             inStockDetailForm.setInStockId(orderId);
@@ -201,12 +216,17 @@ public class StockDetailServiceImpl implements StockDetailService {
                     stockDetailMapper.insert(newStockDetail);
                     stockDetail = newStockDetail;
                 } else {
-                    //更新库存详情记录
+                    //更新库存详情记录，如果是采购入库，移动平均法核算成本单价
+                    if(inStock.getType().equals(2)){
+                        // 新成本单价=（原成本单价*原库存数量+入库单价*入库数量）/（原库存数量+入库数量）
+                        BigDecimal inventoryAmount =  stockDetail.getCostPrice().multiply(stockDetail.getCount()).add(inStockDetail.getPerPrice().multiply(inStockDetail.getActualCount()));
+                        BigDecimal inventoryCount = stockDetail.getCount().add(inStockDetail.getActualCount());
+                        stockDetail.setCostPrice(inventoryAmount.divide(inventoryCount, 2, RoundingMode.HALF_UP));
+                    }
                     stockDetail.setCount(stockDetail.getCount().add(inStockDetail.getActualCount()));
                     stockDetail.setUseCount(stockDetail.getUseCount().add(inStockDetail.getActualCount()));
                     stockDetail.setStockTime(new Date());
-                    stockDetail.setCostPrice(inStockDetail.getPerPrice());
-                    stockDetail.setTotalCostPrice(stockDetail.getTotalCostPrice().add(inStockDetail.getInStockPrice()));
+                    stockDetail.setTotalCostPrice(stockDetail.getCount().multiply(stockDetail.getCostPrice()));
                     stockDetailMapper.updateById(stockDetail);
                 }
                 //库存流水
@@ -230,8 +250,9 @@ public class StockDetailServiceImpl implements StockDetailService {
         InStockSaveParam inStockSaveParam = BeanUtil.copyProperties(inStock, InStockSaveParam.class);
         inStockService.save(inStockSaveParam);
 
-        //采购状态修改为已入库
+        //采购单
         if(inStock.getType().equals(2)){
+            //采购状态修改为已入库
             Long resourceId = inStock.getOriginOrderId();
             Purchase oldPurchasing = purchaseService.getById(resourceId);
             oldPurchasing.setStatus(PurchasingStatusEnum.IN_STOCK.getStatus());
@@ -239,6 +260,7 @@ public class StockDetailServiceImpl implements StockDetailService {
         }
         return stockDetails;
     }
+
     /**
      * 盘点处理
      *
@@ -284,7 +306,6 @@ public class StockDetailServiceImpl implements StockDetailService {
                 stockDetails.add(stockDetail);
             }
         }
-
         return stockDetails;
     }
     @Override
