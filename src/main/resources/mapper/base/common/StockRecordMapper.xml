@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.clt.matlink.modules.base.common.mapper.StockRecordMapper">
+
+    <!--
+      1. 查询库存数量与金额双轴走势
+    -->
+    <select id="getStockTrend" resultType="com.clt.matlink.modules.base.common.domain.vo.StockTrendVO">
+        SELECT
+            -- 1. 统计日期 -> 映射到 VO 的 handleTime 字段
+            stat_date AS handleTime,
+
+            -- 2. 日净变动总和 -> 映射到 VO 的 quantityChange 字段
+            SUM(daily_net_change) AS quantityChange,
+
+            -- 3. 当日最终库存数量 -> 映射到 VO 的 balanceAfter 字段
+            MAX(ending_balance_qty) AS balanceAfter
+        FROM (
+                 SELECT
+                     DATE(handle_time) AS stat_date,
+             quantity_change AS daily_net_change,
+             -- 核心逻辑：按时间倒序取第一条，即当天最后的余额
+             FIRST_VALUE(balance_after) OVER (
+                                              PARTITION BY DATE(handle_time)
+                    ORDER BY handle_time DESC
+                 ) AS ending_balance_qty
+        FROM clt_material_stock_record
+        WHERE del_flag = 0
+            -- 引用 Form 对象中的属性
+          AND material_id = #{form.materialId}
+          AND handle_time BETWEEN #{form.startTime} AND #{form.endTime}
+            ) t
+        -- 按统计日期分组，确保每天只有一行数据
+        GROUP BY stat_date
+        ORDER BY stat_date ASC
+    </select>
+    <!--
+      2. 查询物料成本单价走势
+    -->
+    <select id="getMaterialCostPriceTrend" resultType="com.clt.matlink.modules.base.common.domain.vo.MaterialCostPriceVO">
+        SELECT
+            -- 1. 统计日期 -> 映射到 VO 的 handleTime 字段
+            stat_date AS handleTime,
+            -- 2. 当日最终成本单价 -> 映射到 VO 的 balanceAfter 字段
+            MAX(ending_balance_qty) AS costPrice
+        FROM (
+                 SELECT
+                     DATE(handle_time) AS stat_date,
+             -- 核心逻辑：按时间倒序取第一条，即当天最后的余额
+             FIRST_VALUE(cost_price) OVER (
+                                              PARTITION BY DATE(handle_time)
+                    ORDER BY handle_time DESC
+                 ) AS ending_balance_qty
+        FROM clt_material_stock_record
+        WHERE del_flag = 0
+            -- 引用 Form 对象中的属性
+          AND material_id = #{form.materialId}
+          AND handle_time BETWEEN #{form.startTime} AND #{form.endTime}
+            ) t
+        -- 按统计日期分组，确保每天只有一行数据
+        GROUP BY stat_date
+        ORDER BY stat_date ASC
+    </select>
+    <!--
+     3. 查询出入库流量分析
+   -->
+    <select id="getStockFlowStatistics" resultType="com.clt.matlink.modules.base.common.domain.vo.StockFlowVO">
+        SELECT
+            t.stat_date AS handleTime,
+
+            -- 【核心】条件聚合：计算总入库
+            -- 逻辑：如果是类型1 (入库)，则取变动量；否则取0。最后求和。
+            SUM(CASE WHEN t.type = 1 THEN t.quantity_change ELSE 0 END) AS in_stock_count,
+
+            -- 【核心】条件聚合：计算总出库
+            -- 逻辑：如果是类型2 (出库)，则取变动量；否则取0。
+            -- ⚠️ 注意：如果你的数据库里出库记录存的是负数 (如 -100)，这里直接 SUM 会得到负数。
+            -- 如果希望结果显示为正数 (100)，请包裹 ABS() 或乘以 -1，见下方注释。
+            SUM(CASE WHEN t.type = 2 THEN t.quantity_change ELSE 0 END) AS out_stock_count
+
+        FROM (
+                 SELECT
+                     -- 1. 提取日期 (记得处理时区，参考之前的建议)
+                     DATE(r.handle_time) AS stat_date,
+
+             -- 2. 业务类型 (假设字段名为 type，值为 1 或 2)
+             r.type,
+
+             -- 3. 变动数量
+             r.quantity_change
+
+            FROM clt_material_stock_record r
+        WHERE r.del_flag = 0
+          AND r.material_id = #{form.materialId}
+          AND r.handle_time BETWEEN #{form.startTime} AND #{form.endTime}
+        -- 优化：只查需要的类型，加快过滤速度
+          AND r.type IN (1, 2)
+            ) t
+        GROUP BY t.stat_date
+        ORDER BY t.stat_date ASC
+    </select>
+
+
+</mapper>

@@ -4,6 +4,10 @@ import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.modules.base.common.domain.entity.StockRecord;
 import com.clt.matlink.modules.base.common.domain.form.StockRecordForm;
+import com.clt.matlink.modules.base.common.domain.form.StockTrendForm;
+import com.clt.matlink.modules.base.common.domain.vo.MaterialCostPriceVO;
+import com.clt.matlink.modules.base.common.domain.vo.StockFlowVO;
+import com.clt.matlink.modules.base.common.domain.vo.StockTrendVO;
 
 import java.util.List;
 
@@ -18,4 +22,8 @@ public interface StockRecordService {
 
     List<StockRecord> list(StockRecordForm stockRecordForm);
     PageInfo<StockRecord> page(StockRecordForm stockRecordForm, PageQuery pageQuery);
+    List<StockTrendVO> getStockTrend(StockTrendForm stockTrendForm);
+
+    List<MaterialCostPriceVO>getMaterialCostPriceTrend(StockTrendForm form);
+    List<StockFlowVO> getStockFlowStatistics(StockTrendForm form);
 }

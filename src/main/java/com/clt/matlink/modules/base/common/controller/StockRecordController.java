@@ -5,6 +5,10 @@ import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.domain.vo.Result;
 import com.clt.matlink.modules.base.common.domain.entity.StockRecord;
 import com.clt.matlink.modules.base.common.domain.form.StockRecordForm;
+import com.clt.matlink.modules.base.common.domain.form.StockTrendForm;
+import com.clt.matlink.modules.base.common.domain.vo.MaterialCostPriceVO;
+import com.clt.matlink.modules.base.common.domain.vo.StockFlowVO;
+import com.clt.matlink.modules.base.common.domain.vo.StockTrendVO;
 import com.clt.matlink.modules.base.common.service.StockRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -73,5 +77,26 @@ public class StockRecordController {
     @GetMapping("/page")
     public Result<PageInfo<StockRecord>> page(StockRecordForm stockRecordForm, PageQuery pageQuery){
         return Result.success(stockRecordService.page(stockRecordForm, pageQuery));
+    }
+    /**
+     * 库存数量与金额双轴走势
+     */
+    @GetMapping("/getStockTrend")
+    public Result<List<StockTrendVO>> getStockTrend(StockTrendForm stockTrendForm){
+        return Result.success(stockRecordService.getStockTrend(stockTrendForm));
+    }
+    /**
+     * 成本单价波动监控
+     */
+    @GetMapping("/getMaterialCostPriceTrend")
+    public Result<List<MaterialCostPriceVO>> getMaterialCostPriceTrend(StockTrendForm stockTrendForm){
+        return Result.success(stockRecordService.getMaterialCostPriceTrend(stockTrendForm));
+    }
+    /**
+     * 出入库流量分析
+     */
+    @GetMapping("/getStockFlowStatistics")
+    public Result<List<StockFlowVO>> getStockFlowStatistics(StockTrendForm stockTrendForm){
+        return Result.success(stockRecordService.getStockFlowStatistics(stockTrendForm));
     }
 }
