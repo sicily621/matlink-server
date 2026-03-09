@@ -29,6 +29,7 @@
         WHERE del_flag = 0
             -- 引用 Form 对象中的属性
           AND material_id = #{form.materialId}
+          AND stock_id = #{form.stockId}
           AND handle_time BETWEEN #{form.startTime} AND #{form.endTime}
             ) t
         -- 按统计日期分组，确保每天只有一行数据
@@ -56,6 +57,7 @@
         WHERE del_flag = 0
             -- 引用 Form 对象中的属性
           AND material_id = #{form.materialId}
+          AND stock_id = #{form.stockId}
           AND handle_time BETWEEN #{form.startTime} AND #{form.endTime}
             ) t
         -- 按统计日期分组，确保每天只有一行数据
@@ -93,6 +95,7 @@
             FROM clt_material_stock_record r
         WHERE r.del_flag = 0
           AND r.material_id = #{form.materialId}
+          AND r.stock_id = #{form.stockId}
           AND r.handle_time BETWEEN #{form.startTime} AND #{form.endTime}
         -- 优化：只查需要的类型，加快过滤速度
           AND r.type IN (1, 2)

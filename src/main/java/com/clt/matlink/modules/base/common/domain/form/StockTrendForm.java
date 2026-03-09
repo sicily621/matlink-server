@@ -7,6 +7,7 @@ import java.util.Date;
 
 @Data
 public class StockTrendForm {
+    private Long stockId;
     private Long materialId;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date startTime;
