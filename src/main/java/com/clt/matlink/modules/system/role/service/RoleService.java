@@ -1,6 +1,7 @@
 package com.clt.matlink.modules.system.role.service;
 
 import com.clt.matlink.common.domain.vo.PageInfo;
+import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import com.clt.matlink.modules.system.role.domain.entity.Role;
 import com.clt.matlink.modules.system.role.domain.form.RoleForm;
 
@@ -20,4 +21,5 @@ public interface RoleService {
     List<Role> list();
 
     PageInfo<Role> page(RoleForm roleForm);
+    Boolean validateCode(Role role);
 }

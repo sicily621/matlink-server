@@ -84,5 +84,19 @@ public class EmployeeController {
     public Result<List<Employee>> list(EmployeeForm employeeForm){
         return Result.success(employeeService.list(employeeForm));
     }
+    /**
+     * 校验员工编码是否重复
+     */
+    @PostMapping("/validateCode")
+    public Result<Boolean> validateCode(@RequestBody Employee employee){
+        return Result.success(employeeService.validateCode(employee));
+    }
+    /**
+     * 校验员工用户名是否重复
+     */
+    @PostMapping("/validateUsername")
+    public Result<Boolean> validateUsername(@RequestBody Employee employee){
+        return Result.success(employeeService.validateUsername(employee));
+    }
 
 }

@@ -2,6 +2,7 @@ package com.clt.matlink.modules.system.role.controller;
 
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.domain.vo.Result;
+import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import com.clt.matlink.modules.system.role.domain.entity.Role;
 import com.clt.matlink.modules.system.role.domain.form.RoleForm;
 import com.clt.matlink.modules.system.role.service.RoleService;
@@ -72,5 +73,11 @@ public class RoleController {
     public Result<PageInfo<Role>> page(RoleForm roleForm){
         return Result.success(roleService.page(roleForm));
     }
-
+    /**
+     * 校验编码是否重复
+     */
+    @PostMapping("/validateCode")
+    public Result<Boolean> validateCode(@RequestBody Role role){
+        return Result.success(roleService.validateCode(role));
+    }
 }

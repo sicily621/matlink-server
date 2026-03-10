@@ -32,7 +32,7 @@ public class LoginServiceImpl implements LoginService {
         Employee employee = employeeService.getByUsername(username);
         if (ObjectUtil.isNull(employee)) {
             log.info("登录用户：{} 不存在.", username);
-            throw new ServiceException("用户不存在/密码错误");
+            throw new ServiceException("用户不存在");
         }
         String clientIP = IpUtils.getIpAddr(request);
         LoginLog loginLog = new LoginLog();
@@ -71,7 +71,7 @@ public class LoginServiceImpl implements LoginService {
     private static boolean checkPwd(String password, Employee employee) {
         boolean checkpw = BCrypt.checkpw(password, employee.getPassword());
         if(!checkpw){
-            throw new ServiceException("用户不存在/密码错误");
+            throw new ServiceException("密码错误");
         }
         return checkpw;
     }

@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
+import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.modules.system.department.domain.entity.Department;
 import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import com.clt.matlink.modules.system.employee.domain.form.EmployeeForm;
@@ -57,6 +58,41 @@ public class EmployeeServiceImpl implements EmployeeService {
         lqw.eq(Employee::getUsername, username);
         return employeeMapper.selectOne(lqw);
     }
+
+    @Override
+    public Boolean validateCode(Employee employee) {
+        if (employee.getCode() == null || employee.getCode().trim().isEmpty()) {
+            return false;
+        }
+        LambdaQueryWrapper<Employee> lqw = Wrappers.lambdaQuery();
+        lqw.eq(Employee::getCode, employee.getCode());
+        lqw.eq(Employee::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        if (employee.getId() != null) {
+            // 【编辑场景】：排除当前这条记录本身
+            // 逻辑：查找 (code相同 AND 未删除 AND id != 当前id) 的记录
+            lqw.ne(Employee::getId, employee.getId());
+        }
+        long count = employeeMapper.selectCount(lqw);
+        return count == 0;
+    }
+    @Override
+    public Boolean validateUsername(Employee employee) {
+        if (employee.getUsername() == null || employee.getUsername().trim().isEmpty()) {
+            return false;
+        }
+        LambdaQueryWrapper<Employee> lqw = Wrappers.lambdaQuery();
+        lqw.eq(Employee::getUsername, employee.getUsername());
+        lqw.eq(Employee::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        if (employee.getId() != null) {
+            // 【编辑场景】：排除当前这条记录本身
+            // 逻辑：查找 (code相同 AND 未删除 AND id != 当前id) 的记录
+            lqw.ne(Employee::getId, employee.getId());
+        }
+        long count = employeeMapper.selectCount(lqw);
+        return count == 0;
+    }
+
+
 
     @Override
     public List<Employee> list(EmployeeForm employeeForm) {

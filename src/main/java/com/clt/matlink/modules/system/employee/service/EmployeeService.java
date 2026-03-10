@@ -21,4 +21,6 @@ public interface EmployeeService {
 
     List<Employee> list(EmployeeForm employeeForm);
     List<Employee> getByIds(List<Long> ids);
+    Boolean validateCode(Employee employee);
+    Boolean validateUsername(Employee employee);
 }

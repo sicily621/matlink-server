@@ -88,4 +88,20 @@ public class RoleServiceImpl implements RoleService {
         lqw.in( Role::getId, ids);
         return roleMapper.selectList(lqw);
     }
+    @Override
+    public Boolean validateCode(Role role) {
+        if (role.getCode() == null || role.getCode().trim().isEmpty()) {
+            return false;
+        }
+        LambdaQueryWrapper<Role> lqw = Wrappers.lambdaQuery();
+        lqw.eq(Role::getCode, role.getCode());
+        lqw.eq(Role::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        if (role.getId() != null) {
+            // 【编辑场景】：排除当前这条记录本身
+            // 逻辑：查找 (code相同 AND 未删除 AND id != 当前id) 的记录
+            lqw.ne(Role::getId, role.getId());
+        }
+        long count = roleMapper.selectCount(lqw);
+        return count == 0;
+    }
 }
