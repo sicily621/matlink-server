@@ -202,7 +202,7 @@ public class ExcelUtil {
             builder.registerWriteHandler(new CellMergeStrategy(list, true));
         }
         // 添加下拉框操作
-        builder.registerWriteHandler(new ExcelDownHandler(options));
+        //builder.registerWriteHandler(new ExcelDownHandler(options));
         builder.doWrite(list);
     }
 
