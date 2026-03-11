@@ -27,4 +27,5 @@ public interface OutStockService {
 
     List<OutStock> batchSave(List<OutStock> auditFlowDetails);
     OutStock updateAuditStatus(MaterialAuditRelationParam generateParam);
+    Boolean validateOutStockNo(OutStock outStock);
 }

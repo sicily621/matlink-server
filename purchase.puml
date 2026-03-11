@@ -1,5 +1,5 @@
 @startuml
-
+skinparam classAttributeIconSize 0
 class PurchaseController {
 + create(Purchase):Purchase
 + update(Purchase):Purchase
@@ -9,6 +9,8 @@ class PurchaseController {
 + deleteById(Long):Void
 + list(PurchaseForm):List<Purchase>
 + page(PurchaseForm,PageQuery):PageInfo<PurchaseVo>
++ updateAuditStatus(MaterialAuditRelationParam):Purchase
++ validateBillNo(Purchase):Boolean
 }
 
 
@@ -35,8 +37,14 @@ class PurchaseServiceImpl {
 + list(PurchaseForm):List<Purchase>
 + page(PurchaseForm,PageQuery):PageInfo<PurchaseVo>
 + batchSave(List<Purchase>):List<Purchase>
++ updateAuditStatus(MaterialAuditRelationParam):Purchase
++ validateBillNo(Purchase):Boolean
 }
-
+interface AuditFlowRelationService{
++generateAuditFlowRelation():MaterialAuditRelationGenerateResult
++processAuditFlowRelation():MaterialAuditRelationResult
++listAuditBeingOrderIdsByCurrentUser():List<Long>
+}
 
 interface PurchaseService {
 + Purchase save(Purchase)
@@ -46,6 +54,8 @@ interface PurchaseService {
 + list(PurchaseForm):List<Purchase>
 + page(PurchaseForm,PageQuery):PageInfo<PurchaseVo>
 + batchSave(List<Purchase>):List<Purchase>
++ updateAuditStatus(MaterialAuditRelationParam):Purchase
++ validateBillNo(Purchase):Boolean
 }
 
 interface PurchaseMapper {
@@ -62,5 +72,6 @@ PurchaseService <|.. PurchaseServiceImpl
 BaseEntity <|-- Purchase
 PurchaseServiceImpl ..> PurchaseMapper
 PurchaseServiceImpl ..> Purchase
+PurchaseServiceImpl ..> AuditFlowRelationService
 
 @enduml

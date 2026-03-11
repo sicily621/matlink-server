@@ -96,4 +96,11 @@ public class OutStockController {
             MaterialAuditRelationParam generateParam) {
         return Result.success(outStockService.updateAuditStatus(generateParam));
     }
+    /**
+     * 校验单号是否重复
+     */
+    @PostMapping("/validateOutStockNo")
+    public Result<Boolean> validateOutStockNo(@RequestBody OutStock outStock){
+        return Result.success(outStockService.validateOutStockNo(outStock));
+    }
 }

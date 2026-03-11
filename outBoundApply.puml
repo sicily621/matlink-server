@@ -10,6 +10,8 @@ class OutBoundApplyServiceImpl {
 + list(OutBoundApplyForm):List<OutBoundApply>
 + page(OutBoundApplyForm,PageQuery):PageInfo<OutBoundApplyVo>
 + batchSave(List<OutBoundApply>):List<OutBoundApply>
++ updateAuditStatus(MaterialAuditRelationParam):OutBoundApply
++ validateApplyNo(OutBoundApply):Boolean
 }
 
 class OutBoundApplyController {
@@ -21,9 +23,15 @@ class OutBoundApplyController {
 + deleteById(Long):Void
 + list(OutBoundApplyForm):List<OutBoundApply>
 + page(OutBoundApplyForm,PageQuery):PageInfo<OutBoundApplyVo>
++ updateAuditStatus(MaterialAuditRelationParam):OutBoundApply
++ validateApplyNo(OutBoundApply):Boolean
 }
 
-
+interface AuditFlowRelationService{
++generateAuditFlowRelation():MaterialAuditRelationGenerateResult
++processAuditFlowRelation():MaterialAuditRelationResult
++listAuditBeingOrderIdsByCurrentUser():List<Long>
+}
 interface OutBoundApplyService {
 + save(OutBoundApply):OutBoundApply
 + getById(Long):OutBoundApply
@@ -32,6 +40,8 @@ interface OutBoundApplyService {
 + list(OutBoundApplyForm):List<OutBoundApply>
 + page(OutBoundApplyForm,PageQuery):PageInfo<OutBoundApplyVo>
 + batchSave(List<OutBoundApply>):List<OutBoundApply>
++ updateAuditStatus(MaterialAuditRelationParam):OutBoundApply
++ validateApplyNo(OutBoundApply):Boolean
 }
 
 
@@ -39,7 +49,6 @@ interface OutBoundApplyService {
 class OutBoundApply {
 - Long id
 - Long stockId
-- Long workorderId
 - String applyNo
 - Date applyTime
 - Long deptId
@@ -49,7 +58,6 @@ class OutBoundApply {
 - Long auditUserId
 - Date auditTime
 - String purpose
-- String description
 - Long createUserId
 }
 class BaseEntity {
@@ -64,7 +72,7 @@ OutBoundApplyService <|.. OutBoundApplyServiceImpl
 BaseEntity <|-- OutBoundApply
 OutBoundApplyServiceImpl ..> OutBoundApplyMapper
 OutBoundApplyServiceImpl ..> OutBoundApply
-
+OutBoundApplyServiceImpl ..> AuditFlowRelationService
 
 
 @enduml

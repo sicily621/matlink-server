@@ -29,6 +29,7 @@ import com.clt.matlink.modules.outstock.domain.vo.OutStockVo;
 import com.clt.matlink.modules.outstock.mapper.OutStockMapper;
 import com.clt.matlink.modules.outstock.service.OutStockDetailService;
 import com.clt.matlink.modules.outstock.service.OutStockService;
+import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -174,5 +175,20 @@ public class OutStockServiceImpl implements OutStockService {
         lqw.eq( OutStock::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }
-
+    @Override
+    public Boolean validateOutStockNo(OutStock outStock) {
+        if (outStock.getOutStockNo() == null || outStock.getOutStockNo().trim().isEmpty()) {
+            return false;
+        }
+        LambdaQueryWrapper<OutStock> lqw = Wrappers.lambdaQuery();
+        lqw.eq(OutStock::getOutStockNo, outStock.getOutStockNo());
+        lqw.eq(OutStock::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        if (outStock.getId() != null) {
+            // 【编辑场景】：排除当前这条记录本身
+            // 逻辑：查找 (code相同 AND 未删除 AND id != 当前id) 的记录
+            lqw.ne(OutStock::getId, outStock.getId());
+        }
+        long count = outStockMapper.selectCount(lqw);
+        return count == 0;
+    }
 }

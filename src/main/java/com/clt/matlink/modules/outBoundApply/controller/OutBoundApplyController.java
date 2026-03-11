@@ -9,6 +9,7 @@ import com.clt.matlink.modules.outBoundApply.domain.form.OutBoundApplyForm;
 import com.clt.matlink.modules.outBoundApply.domain.vo.OutBoundApplyVo;
 import com.clt.matlink.modules.outBoundApply.service.OutBoundApplyService;
 import com.clt.matlink.modules.outstock.domain.entity.OutStock;
+import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -101,5 +102,12 @@ public class OutBoundApplyController {
             @RequestBody
             MaterialAuditRelationParam generateParam) {
         return Result.success(outBoundApplyService.updateAuditStatus(generateParam));
+    }
+    /**
+     * 校验单号是否重复
+     */
+    @PostMapping("/validateApplyNo")
+    public Result<Boolean> validateApplyNo(@RequestBody OutBoundApply outBoundApply){
+        return Result.success(outBoundApplyService.validateApplyNo(outBoundApply));
     }
 }

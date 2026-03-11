@@ -25,6 +25,7 @@ import com.clt.matlink.modules.instock.domain.vo.InStockVo;
 import com.clt.matlink.modules.instock.mapper.InStockMapper;
 import com.clt.matlink.modules.instock.service.InStockDetailService;
 import com.clt.matlink.modules.instock.service.InStockService;
+import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -175,5 +176,20 @@ public class InStockServiceImpl implements InStockService {
         lqw.eq( InStock::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }
-
+    @Override
+    public Boolean validateInStockNo(InStock inStock) {
+        if (inStock.getInStockNo() == null || inStock.getInStockNo().trim().isEmpty()) {
+            return false;
+        }
+        LambdaQueryWrapper<InStock> lqw = Wrappers.lambdaQuery();
+        lqw.eq(InStock::getInStockNo, inStock.getInStockNo());
+        lqw.eq(InStock::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        if (inStock.getId() != null) {
+            // 【编辑场景】：排除当前这条记录本身
+            // 逻辑：查找 (code相同 AND 未删除 AND id != 当前id) 的记录
+            lqw.ne(InStock::getId, inStock.getId());
+        }
+        long count = inStockMapper.selectCount(lqw);
+        return count == 0;
+    }
 }

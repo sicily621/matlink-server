@@ -8,6 +8,8 @@ interface OutStockService {
 + list():List<OutStock>
 + page():PageInfo<OutStockVo>
 + batchSave():List<OutStock>
++ updateAuditStatus(MaterialAuditRelationParam):OutStock
++ validateOutStockNo(OutStock):Boolean
 }
 
 class OutStockController {
@@ -19,6 +21,8 @@ class OutStockController {
 + deleteById(Long):Void
 + list(OutStockForm):List<OutStock>
 + page(OutStockForm,PageQuery):PageInfo<OutStockVo>
++ updateAuditStatus(MaterialAuditRelationParam):OutStock
++ validateOutStockNo(OutStock):Boolean
 }
 
 
@@ -27,6 +31,8 @@ interface OutStockDetailService {
 + list():List<OutStockDetail>
 + batchSave():List<OutStockDetail>
 + findOutStockAmount():BigDecimal
++ updateAuditStatus(MaterialAuditRelationParam):OutStock
++ validateOutStockNo(OutStock):Boolean
 }
 
 interface OutStockMapper {

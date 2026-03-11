@@ -1,0 +1,77 @@
+@startuml
+skinparam classAttributeIconSize 0
+interface AuditFlowRelationMapper {
+}
+class AuditFlowRelationController {
++list(AuditFlowRelationForm):List<AuditFlowRelation>
+}
+
+
+interface AuditFlowRelationService {
++ save(AuditFlowRelation):AuditFlowRelation
++ getById(Long):AuditFlowRelation
++ getByIds(List<Long>):List<AuditFlowRelation>
++ deleteById(Long):Boolean
++ list(AuditFlowRelationForm):List<AuditFlowRelation>
++ listAuditBeingByCurrentUser(CurrentUserQuery):List<AuditFlowRelation>
++ listAuditBeingOrderIdsByCurrentUser(CurrentUserQuery):List<Long>
++ page(AuditFlowRelationForm,PageQuery):PageInfo<AuditFlowRelation>
++ batchSave(List<AuditFlowRelation>):List<AuditFlowRelation>
++ generateAuditFlowRelation(GenerateParam):MaterialAuditRelationGenerateResult
++ processAuditFlowRelation(RelationParam):MaterialAuditRelationResult
+}
+
+
+class AuditFlowServiceRelationImpl {
++ save(AuditFlowRelation):AuditFlowRelation
++ getById(Long):AuditFlowRelation
++ getByIds(List<Long>):List<AuditFlowRelation>
++ deleteById(Long):Boolean
++ list(AuditFlowRelationForm):List<AuditFlowRelation>
++ listAuditBeingByCurrentUser(CurrentUserQuery):List<AuditFlowRelation>
++ listAuditBeingOrderIdsByCurrentUser(CurrentUserQuery):List<Long>
++ page(AuditFlowRelationForm,PageQuery):PageInfo<AuditFlowRelation>
++ batchSave(List<AuditFlowRelation>):List<AuditFlowRelation>
++ generateAuditFlowRelation(GenerateParam):MaterialAuditRelationGenerateResult
++ processAuditFlowRelation(RelationParam):MaterialAuditRelationResult
+}
+
+
+class AuditFlowRelation {
+- Long id
+- Long stockId
+- Long orderId
+- Integer auditStatus
+- Date auditTime
+- Long auditUserId
+- Long deptId
+- Integer type
+- Integer enable
+- Integer currentAuditLevel
+}
+
+class BaseEntity {
+- Date createTime
+- Date updateTime
+- Integer delFlag
+}
+interface AuditFlowRelationMapper {
+}
+interface AuditFlowService{}
+interface AuditFlowDetailService{}
+interface AuditFlowDetailRelationService{}
+interface RoleService{}
+interface EmployeeService{}
+
+AuditFlowRelationController ..> AuditFlowRelationService
+AuditFlowRelationController ..> AuditFlowRelation
+AuditFlowRelationService <|.. AuditFlowServiceRelationImpl
+BaseEntity <|-- AuditFlowRelation
+AuditFlowServiceRelationImpl ..> AuditFlowRelationMapper
+AuditFlowServiceRelationImpl ..> AuditFlowRelation
+AuditFlowServiceRelationImpl ..> AuditFlowDetailService
+AuditFlowServiceRelationImpl ..> AuditFlowDetailRelationService
+AuditFlowServiceRelationImpl ..> RoleService
+AuditFlowServiceRelationImpl ..> EmployeeService
+AuditFlowServiceRelationImpl ..> AuditFlowService
+@enduml

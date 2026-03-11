@@ -9,6 +9,7 @@ import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import com.clt.matlink.modules.purchase.domain.form.PurchaseForm;
 import com.clt.matlink.modules.purchase.domain.vo.PurchaseVo;
 import com.clt.matlink.modules.purchase.service.PurchaseService;
+import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -101,5 +102,12 @@ public class PurchaseController {
             @RequestBody
             MaterialAuditRelationParam generateParam) {
         return Result.success(purchaseService.updateAuditStatus(generateParam));
+    }
+    /**
+     * 校验单号是否重复
+     */
+    @PostMapping("/validateBillNo")
+    public Result<Boolean> validateBillNo(@RequestBody Purchase purchase){
+        return Result.success(purchaseService.validateBillNo(purchase));
     }
 }

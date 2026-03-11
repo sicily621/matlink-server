@@ -26,6 +26,7 @@ import com.clt.matlink.modules.purchase.domain.form.PurchaseSaveParam;
 import com.clt.matlink.modules.purchase.domain.vo.PurchaseVo;
 import com.clt.matlink.modules.purchase.mapper.PurchaseMapper;
 import com.clt.matlink.modules.purchase.service.PurchaseService;
+import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -167,5 +168,20 @@ public class PurchaseServiceImpl implements PurchaseService {
         lqw.eq( Purchase::getDelFlag, DelFlagEnum.NORMAL.getValue());
         return lqw;
     }
-
+    @Override
+    public Boolean validateBillNo(Purchase purchase) {
+        if (purchase.getBillNo() == null || purchase.getBillNo().trim().isEmpty()) {
+            return false;
+        }
+        LambdaQueryWrapper<Purchase> lqw = Wrappers.lambdaQuery();
+        lqw.eq(Purchase::getBillNo, purchase.getBillNo());
+        lqw.eq(Purchase::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        if (purchase.getId() != null) {
+            // 【编辑场景】：排除当前这条记录本身
+            // 逻辑：查找 (code相同 AND 未删除 AND id != 当前id) 的记录
+            lqw.ne(Purchase::getId, purchase.getId());
+        }
+        long count = purchaseMapper.selectCount(lqw);
+        return count == 0;
+    }
 }

@@ -10,6 +10,8 @@ class InStockServiceImpl {
 +  page():PageInfo<InStockVo>
 +  batchSave():List<InStock>
 +  updateAuditStatus():InStock
++  updateAuditStatus(MaterialAuditRelationParam):InStock
++  validateInStockNo(InStock):Boolean
 }
 
 
@@ -48,6 +50,8 @@ class InStockController {
 + list():List<InStock>
 + page():PageInfo<InStockVo>
 + updateAuditStatus():InStock
++ updateAuditStatus(MaterialAuditRelationParam):InStock
++ validateInStockNo(InStock):Boolean
 }
 
 interface InStockDetailService {
@@ -65,6 +69,8 @@ interface InStockService {
 + page():PageInfo<InStockVo>
 + batchSave():List<InStock>
 + updateAuditStatus():InStock
++ updateAuditStatus(MaterialAuditRelationParam):InStock
++ validateInStockNo(InStock):Boolean
 }
 
 class BaseEntity {

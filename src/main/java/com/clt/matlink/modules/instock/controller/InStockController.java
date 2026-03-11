@@ -10,6 +10,7 @@ import com.clt.matlink.modules.instock.domain.form.InStockForm;
 import com.clt.matlink.modules.instock.domain.form.InStockSaveParam;
 import com.clt.matlink.modules.instock.domain.vo.InStockVo;
 import com.clt.matlink.modules.instock.service.InStockService;
+import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -96,5 +97,12 @@ public class InStockController {
             @RequestBody
             MaterialAuditRelationParam generateParam) {
         return Result.success(inStockService.updateAuditStatus(generateParam));
+    }
+    /**
+     * 校验单号是否重复
+     */
+    @PostMapping("/validateInStockNo")
+    public Result<Boolean> validateInStockNo(@RequestBody InStock inStock){
+        return Result.success(inStockService.validateInStockNo(inStock));
     }
 }

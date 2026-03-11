@@ -26,6 +26,7 @@ import com.clt.matlink.modules.outBoundApply.mapper.OutBoundApplyMapper;
 import com.clt.matlink.modules.outBoundApply.service.OutBoundApplyService;
 import com.clt.matlink.modules.outstock.domain.entity.OutStock;
 import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
+import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -169,5 +170,21 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
 //            dealDirectInStock(entity.getId());
         }
         return this.getById(old.getId());
+    }
+    @Override
+    public Boolean validateApplyNo(OutBoundApply outBoundApply) {
+        if (outBoundApply.getApplyNo() == null || outBoundApply.getApplyNo().trim().isEmpty()) {
+            return false;
+        }
+        LambdaQueryWrapper<OutBoundApply> lqw = Wrappers.lambdaQuery();
+        lqw.eq(OutBoundApply::getApplyNo, outBoundApply.getApplyNo());
+        lqw.eq(OutBoundApply::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        if (outBoundApply.getId() != null) {
+            // 【编辑场景】：排除当前这条记录本身
+            // 逻辑：查找 (code相同 AND 未删除 AND id != 当前id) 的记录
+            lqw.ne(OutBoundApply::getId, outBoundApply.getId());
+        }
+        long count = outBoundApplyMapper.selectCount(lqw);
+        return count == 0;
     }
 }

@@ -25,4 +25,5 @@ public interface PurchaseService {
 
     List<Purchase> batchSave(List<Purchase> auditFlowDetails);
     Purchase updateAuditStatus(MaterialAuditRelationParam generateParam);
+    Boolean validateBillNo(Purchase purchase);
 }
