@@ -1,5 +1,6 @@
 @startuml
 skinparam classAttributeIconSize 0
+top to bottom direction
 interface AuditFlowRelationMapper {
 }
 class AuditFlowRelationController {
@@ -14,11 +15,11 @@ interface AuditFlowRelationService {
 + deleteById(Long):Boolean
 + list(AuditFlowRelationForm):List<AuditFlowRelation>
 + listAuditBeingByCurrentUser(CurrentUserQuery):List<AuditFlowRelation>
-+ listAuditBeingOrderIdsByCurrentUser(CurrentUserQuery):List<Long>
 + page(AuditFlowRelationForm,PageQuery):PageInfo<AuditFlowRelation>
 + batchSave(List<AuditFlowRelation>):List<AuditFlowRelation>
-+ generateAuditFlowRelation(GenerateParam):MaterialAuditRelationGenerateResult
-+ processAuditFlowRelation(RelationParam):MaterialAuditRelationResult
++ listAuditBeingOrderIdsByCurrentUser():List<Long>
++ generateAuditFlowRelation():MaterialAuditRelationGenerateResult
++ processAuditFlowRelation():MaterialAuditRelationResult
 }
 
 
@@ -29,11 +30,11 @@ class AuditFlowServiceRelationImpl {
 + deleteById(Long):Boolean
 + list(AuditFlowRelationForm):List<AuditFlowRelation>
 + listAuditBeingByCurrentUser(CurrentUserQuery):List<AuditFlowRelation>
-+ listAuditBeingOrderIdsByCurrentUser(CurrentUserQuery):List<Long>
 + page(AuditFlowRelationForm,PageQuery):PageInfo<AuditFlowRelation>
 + batchSave(List<AuditFlowRelation>):List<AuditFlowRelation>
-+ generateAuditFlowRelation(GenerateParam):MaterialAuditRelationGenerateResult
-+ processAuditFlowRelation(RelationParam):MaterialAuditRelationResult
++ listAuditBeingOrderIdsByCurrentUser():List<Long>
++ generateAuditFlowRelation():MaterialAuditRelationGenerateResult
++ processAuditFlowRelation():MaterialAuditRelationResult
 }
 
 
@@ -55,14 +56,19 @@ class BaseEntity {
 - Date updateTime
 - Integer delFlag
 }
+
+interface AuditFlowService{
++ getByCondition(AuditFlowForm):AuditFlow
+}
+interface AuditFlowDetailService{
++ list(AuditFlowDetailForm):List<AuditFlowDetail>
+}
+interface AuditFlowDetailRelationService{
++ listAuditBeingDetail(RelationForm):List<DetailRelation>
+}
+
 interface AuditFlowRelationMapper {
 }
-interface AuditFlowService{}
-interface AuditFlowDetailService{}
-interface AuditFlowDetailRelationService{}
-interface RoleService{}
-interface EmployeeService{}
-
 AuditFlowRelationController ..> AuditFlowRelationService
 AuditFlowRelationController ..> AuditFlowRelation
 AuditFlowRelationService <|.. AuditFlowServiceRelationImpl
@@ -71,7 +77,7 @@ AuditFlowServiceRelationImpl ..> AuditFlowRelationMapper
 AuditFlowServiceRelationImpl ..> AuditFlowRelation
 AuditFlowServiceRelationImpl ..> AuditFlowDetailService
 AuditFlowServiceRelationImpl ..> AuditFlowDetailRelationService
-AuditFlowServiceRelationImpl ..> RoleService
-AuditFlowServiceRelationImpl ..> EmployeeService
 AuditFlowServiceRelationImpl ..> AuditFlowService
+AuditFlowRelationMapper.[hidden] AuditFlowServiceRelationImpl
+AuditFlowRelation.[hidden] AuditFlowServiceRelationImpl
 @enduml

@@ -9,6 +9,8 @@ class EmployeeController {
 + deleteById(Long):Void
 + page(EmployeeForm,PageQuery):PageInfo<Employee>
 + list(EmployeeForm):List<Employee>
++ validateCode(Employee):Boolean;
++ validateUsername(Employee):Boolean;
 }
 
 interface EmployeeService {
@@ -19,6 +21,8 @@ interface EmployeeService {
 + getByUsername(String):Employee
 + list(EmployeeForm):List<Employee>
 + getByIds(List<Long>):List<Employee>
++ validateCode(Employee):Boolean;
++ validateUsername(Employee):Boolean;
 }
 
 interface EmployeeMapper {
@@ -54,6 +58,8 @@ class EmployeeServiceImpl {
 + deleteById(Long):boolean
 + page(EmployeeForm,PageQuery):PageInfo<Employee>
 + getByIds(List<Long>):List<Employee>
++ validateCode(Employee):Boolean;
++ validateUsername(Employee):Boolean;
 }
 EmployeeController ..> EmployeeService
 EmployeeController ..> Employee
