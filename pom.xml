@@ -197,6 +197,22 @@
 			</exclusions>
 		</dependency>
 
+		<!-- Source: https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine -->
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+			<version>3.2.3</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Source: https://mvnrepository.com/artifact/com.baomidou/lock4j-core -->
+		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>lock4j-core</artifactId>
+			<version>2.2.7</version>
+			<scope>compile</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

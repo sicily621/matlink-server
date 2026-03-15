@@ -7,6 +7,7 @@ import java.util.Date;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.lock.annotation.Lock4j;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -195,53 +196,7 @@ public class StockDetailServiceImpl implements StockDetailService {
             inStockDetailForm.setInStockId(orderId);
             List<InStockDetail> inStockDetails = inStockDetailService.list(inStockDetailForm);
             for (InStockDetail inStockDetail : inStockDetails) {
-                StockDetailForm stockDetailForm = new StockDetailForm();
-                stockDetailForm.setMaterialId(inStockDetail.getMaterialId());
-                stockDetailForm.setStockId(inStockDetail.getStockId());
-                StockDetail stockDetail = this.getByConditions(stockDetailForm);
-                Material material = materialService.getById(inStockDetail.getMaterialId());
-                if (stockDetail == null) {
-                    //新增库存详情记录
-                    StockDetail newStockDetail = new StockDetail();
-                    newStockDetail.setStockId(inStockDetail.getStockId());
-                    newStockDetail.setMaterialTypeId(material.getMaterialTypeId());
-                    newStockDetail.setMaterialId(inStockDetail.getMaterialId());
-                    newStockDetail.setCount(inStockDetail.getActualCount());
-                    newStockDetail.setLockCount(BigDecimal.ZERO);
-                    newStockDetail.setUseCount(inStockDetail.getActualCount());
-                    newStockDetail.setStockTime(new Date());
-                    newStockDetail.setTransitCount(BigDecimal.ZERO);
-                    newStockDetail.setCostPrice(inStockDetail.getPerPrice());
-                    newStockDetail.setTotalCostPrice(inStockDetail.getInStockPrice());
-                    stockDetailMapper.insert(newStockDetail);
-                    stockDetail = newStockDetail;
-                } else {
-                    //更新库存详情记录，如果是采购入库，移动平均法核算成本单价
-                    if(inStock.getType().equals(2)){
-                        // 新成本单价=（原成本单价*原库存数量+入库单价*入库数量）/（原库存数量+入库数量）
-                        BigDecimal inventoryAmount =  stockDetail.getCostPrice().multiply(stockDetail.getCount()).add(inStockDetail.getPerPrice().multiply(inStockDetail.getActualCount()));
-                        BigDecimal inventoryCount = stockDetail.getCount().add(inStockDetail.getActualCount());
-                        stockDetail.setCostPrice(inventoryAmount.divide(inventoryCount, 2, RoundingMode.HALF_UP));
-                    }
-                    stockDetail.setCount(stockDetail.getCount().add(inStockDetail.getActualCount()));
-                    stockDetail.setUseCount(stockDetail.getUseCount().add(inStockDetail.getActualCount()));
-                    stockDetail.setStockTime(new Date());
-                    stockDetail.setTotalCostPrice(stockDetail.getCount().multiply(stockDetail.getCostPrice()));
-                    stockDetailMapper.updateById(stockDetail);
-                }
-                //库存流水
-                StockRecord stockRecord = new StockRecord();
-                stockRecord.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
-                stockRecord.setRelatedOrderId(inStockDetail.getInStockId());
-                stockRecord.setMaterialId(inStockDetail.getMaterialId());
-                stockRecord.setStockId(inStockDetail.getStockId());
-                stockRecord.setQuantityChange(inStockDetail.getActualCount());
-                stockRecord.setBalanceAfter(stockDetail.getCount());
-                stockRecord.setCostPrice(stockDetail.getCostPrice());
-                stockRecord.setTotalCostPrice(stockDetail.getTotalCostPrice());
-                stockRecord.setHandleUserId(LoginHelper.getLoginEmployeeId());
-                stockRecord.setHandleTime(new Date());
-                stockRecordService.save(stockRecord);
+                StockDetail stockDetail = handleInStockDetail(inStockDetail, inStock);
                 stockDetails.add(stockDetail);
             }
         }
@@ -259,6 +214,58 @@ public class StockDetailServiceImpl implements StockDetailService {
             purchaseService.save(oldPurchasing);
         }
         return stockDetails;
+    }
+
+    @Lock4j(keys = {"#inStockDetail.getStockId()", "#inStockDetail.getMaterialId()"})
+    public StockDetail handleInStockDetail(InStockDetail inStockDetail, InStock inStock) {
+        StockDetailForm stockDetailForm = new StockDetailForm();
+        stockDetailForm.setMaterialId(inStockDetail.getMaterialId());
+        stockDetailForm.setStockId(inStockDetail.getStockId());
+        StockDetail stockDetail = this.getByConditions(stockDetailForm);
+        Material material = materialService.getById(inStockDetail.getMaterialId());
+        if (stockDetail == null) {
+            //新增库存详情记录
+            StockDetail newStockDetail = new StockDetail();
+            newStockDetail.setStockId(inStockDetail.getStockId());
+            newStockDetail.setMaterialTypeId(material.getMaterialTypeId());
+            newStockDetail.setMaterialId(inStockDetail.getMaterialId());
+            newStockDetail.setCount(inStockDetail.getActualCount());
+            newStockDetail.setLockCount(BigDecimal.ZERO);
+            newStockDetail.setUseCount(inStockDetail.getActualCount());
+            newStockDetail.setStockTime(new Date());
+            newStockDetail.setTransitCount(BigDecimal.ZERO);
+            newStockDetail.setCostPrice(inStockDetail.getPerPrice());
+            newStockDetail.setTotalCostPrice(inStockDetail.getInStockPrice());
+            stockDetailMapper.insert(newStockDetail);
+            stockDetail = newStockDetail;
+        } else {
+            //更新库存详情记录，如果是采购入库，移动平均法核算成本单价
+            if(inStock.getType().equals(2)){
+                // 新成本单价=（原成本单价*原库存数量+入库单价*入库数量）/（原库存数量+入库数量）
+                BigDecimal inventoryAmount =  stockDetail.getCostPrice().multiply(stockDetail.getCount()).add(inStockDetail.getPerPrice().multiply(inStockDetail.getActualCount()));
+                BigDecimal inventoryCount = stockDetail.getCount().add(inStockDetail.getActualCount());
+                stockDetail.setCostPrice(inventoryAmount.divide(inventoryCount, 2, RoundingMode.HALF_UP));
+            }
+            stockDetail.setCount(stockDetail.getCount().add(inStockDetail.getActualCount()));
+            stockDetail.setUseCount(stockDetail.getUseCount().add(inStockDetail.getActualCount()));
+            stockDetail.setStockTime(new Date());
+            stockDetail.setTotalCostPrice(stockDetail.getCount().multiply(stockDetail.getCostPrice()));
+            stockDetailMapper.updateById(stockDetail);
+        }
+        //库存流水
+        StockRecord stockRecord = new StockRecord();
+        stockRecord.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
+        stockRecord.setRelatedOrderId(inStockDetail.getInStockId());
+        stockRecord.setMaterialId(inStockDetail.getMaterialId());
+        stockRecord.setStockId(inStockDetail.getStockId());
+        stockRecord.setQuantityChange(inStockDetail.getActualCount());
+        stockRecord.setBalanceAfter(stockDetail.getCount());
+        stockRecord.setCostPrice(stockDetail.getCostPrice());
+        stockRecord.setTotalCostPrice(stockDetail.getTotalCostPrice());
+        stockRecord.setHandleUserId(LoginHelper.getLoginEmployeeId());
+        stockRecord.setHandleTime(new Date());
+        stockRecordService.save(stockRecord);
+        return stockDetail;
     }
 
     /**
