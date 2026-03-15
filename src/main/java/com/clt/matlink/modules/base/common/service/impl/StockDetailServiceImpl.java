@@ -197,6 +197,19 @@ public class StockDetailServiceImpl implements StockDetailService {
             List<InStockDetail> inStockDetails = inStockDetailService.list(inStockDetailForm);
             for (InStockDetail inStockDetail : inStockDetails) {
                 StockDetail stockDetail = handleInStockDetail(inStockDetail, inStock);
+                //库存流水
+                StockRecord stockRecord = new StockRecord();
+                stockRecord.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
+                stockRecord.setRelatedOrderId(inStockDetail.getInStockId());
+                stockRecord.setMaterialId(inStockDetail.getMaterialId());
+                stockRecord.setStockId(inStockDetail.getStockId());
+                stockRecord.setQuantityChange(inStockDetail.getActualCount());
+                stockRecord.setBalanceAfter(stockDetail.getCount());
+                stockRecord.setCostPrice(stockDetail.getCostPrice());
+                stockRecord.setTotalCostPrice(stockDetail.getTotalCostPrice());
+                stockRecord.setHandleUserId(LoginHelper.getLoginEmployeeId());
+                stockRecord.setHandleTime(new Date());
+                stockRecordService.save(stockRecord);
                 stockDetails.add(stockDetail);
             }
         }
@@ -252,19 +265,6 @@ public class StockDetailServiceImpl implements StockDetailService {
             stockDetail.setTotalCostPrice(stockDetail.getCount().multiply(stockDetail.getCostPrice()));
             stockDetailMapper.updateById(stockDetail);
         }
-        //库存流水
-        StockRecord stockRecord = new StockRecord();
-        stockRecord.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
-        stockRecord.setRelatedOrderId(inStockDetail.getInStockId());
-        stockRecord.setMaterialId(inStockDetail.getMaterialId());
-        stockRecord.setStockId(inStockDetail.getStockId());
-        stockRecord.setQuantityChange(inStockDetail.getActualCount());
-        stockRecord.setBalanceAfter(stockDetail.getCount());
-        stockRecord.setCostPrice(stockDetail.getCostPrice());
-        stockRecord.setTotalCostPrice(stockDetail.getTotalCostPrice());
-        stockRecord.setHandleUserId(LoginHelper.getLoginEmployeeId());
-        stockRecord.setHandleTime(new Date());
-        stockRecordService.save(stockRecord);
         return stockDetail;
     }
 
