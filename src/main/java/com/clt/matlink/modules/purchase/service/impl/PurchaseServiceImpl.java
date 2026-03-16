@@ -57,7 +57,6 @@ public class PurchaseServiceImpl implements PurchaseService {
             purchase.setAuditTime(auditFlowRelation.getAuditTime());
             purchase.setAuditUserId(auditFlowRelation.getAuditUserId());
             purchaseMapper.updateById(purchase);
-            // TODO 是否直接入库
         }else{
             flag = purchaseMapper.updateById(purchase);
         }
