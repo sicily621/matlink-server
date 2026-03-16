@@ -3,7 +3,7 @@ package com.clt.matlink.modules.enums;
 import lombok.Getter;
 
 /**
- * 物料审核状态枚举
+ * 物料审批状态枚举
  */
 
 @Getter

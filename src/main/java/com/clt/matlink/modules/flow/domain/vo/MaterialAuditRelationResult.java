@@ -16,7 +16,7 @@ public class MaterialAuditRelationResult {
     @Schema(description = "处理流")
     private AuditFlowRelation flowRelation;
 
-    @Schema(description = "审核时间")
+    @Schema(description = "审批时间")
     private Date auditTime;
 
 }

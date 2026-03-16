@@ -3,16 +3,16 @@ package com.clt.matlink.modules.enums;
 import lombok.Getter;
 
 /**
- * 物料审核状态枚举
+ * 物料审批状态枚举
  */
 
 @Getter
 public enum MateriaAuditStatusEnum {
 
     AUDIT_AWAIT(0, "待审批"),
-    AUDIT_FAIL(1, "审核拒绝"),
-    AUDIT_SUCCESS(2, "审核通过"),
-    AUDIT_BEING(3, "审核中"),
+    AUDIT_FAIL(1, "审批拒绝"),
+    AUDIT_SUCCESS(2, "审批通过"),
+    AUDIT_BEING(3, "审批中"),
     ;
     private final int status;
     private final String name;

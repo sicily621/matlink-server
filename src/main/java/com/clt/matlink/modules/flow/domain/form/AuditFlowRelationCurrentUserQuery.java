@@ -14,7 +14,7 @@ public class AuditFlowRelationCurrentUserQuery {
     @Schema(description = "资源id")
     private Long stockId;
 
-    @Schema(description = "审核人ID")
+    @Schema(description = "审批人ID")
     private Long userId;
 
 }

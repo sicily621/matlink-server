@@ -94,7 +94,7 @@ public class StockDetailServiceImpl implements StockDetailService {
         } else if(type.equals(MateriaAuditResourceTypeEnum.MATERIAL_INVENTORY.getValue())){
             return handleTask(orderId);
         }else {
-            throw new ServiceException("未知的审核资源类型");
+            throw new ServiceException("未知的审批资源类型");
         }
     }
 
@@ -157,7 +157,7 @@ public class StockDetailServiceImpl implements StockDetailService {
                 stockDetails.add(stockDetail);
             }
         }
-        //修改库存状态审核状态 已出库
+        //修改库存状态审批状态 已出库
         outStock.setStatus(MateriaInOrOutStockStatusEnum.IN_OR_OUT_STOCK.getValue());
         OutStockSaveParam outStockSaveParam = BeanUtil.copyProperties(outStock, OutStockSaveParam.class);
         outStockService.save(outStockSaveParam);
@@ -211,7 +211,7 @@ public class StockDetailServiceImpl implements StockDetailService {
                 stockDetails.add(stockDetail);
             }
         }
-        //修改库存状态审核状态 已入库
+        //修改库存状态审批状态 已入库
         inStock.setStatus(MateriaInOrOutStockStatusEnum.IN_OR_OUT_STOCK.getValue());
         InStockSaveParam inStockSaveParam = BeanUtil.copyProperties(inStock, InStockSaveParam.class);
         inStockService.save(inStockSaveParam);

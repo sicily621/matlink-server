@@ -36,7 +36,7 @@ public class Task extends BaseEntity {
     private Date auditTime;
     @Schema(description = "描述")
     private String description;
-    @Schema(description = "审批状态：0-未审核，1-审核中，2-已审核")
+    @Schema(description = "审批状态：0-未审批，1-审批中，2-已审批")
     private Integer auditStatus;
     @Schema(description = "审批人id")
     private Long auditUserId;
