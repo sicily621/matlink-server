@@ -63,13 +63,7 @@ public class InStockServiceImpl implements InStockService {
             inStock.setAuditTime(auditFlowRelation.getAuditTime());
             inStock.setAuditUserId(auditFlowRelation.getAuditUserId());
             inStockMapper.updateById(inStock);
-            // 直接入库
-            if(inStock.getIsDirect()==1 && auditFlowRelation.getAuditStatus()== MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()){
-                StockSaveParam stockSaveParam = new StockSaveParam();
-                stockSaveParam.setOrderId(inStock.getId());
-                stockSaveParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
-                stockDetailService.save(stockSaveParam);
-            }
+
         }else{
             flag = inStockMapper.updateById(inStock);
         }
@@ -163,10 +157,12 @@ public class InStockServiceImpl implements InStockService {
         entity.setAuditTime(flowRelation.getAuditTime());
         entity.setAuditUserId(generateParam.getCurrentUserId());
         this.save(entity);
-        //审批通过
-        if (entity.getAuditStatus().equals(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus())) {
-            // TODO 判断是否直接入库
-//            dealDirectInStock(entity.getId());
+        //审批通过 是否直接入库
+        if(old.getIsDirect()==1 && entity.getAuditStatus()== MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()){
+            StockSaveParam stockSaveParam = new StockSaveParam();
+            stockSaveParam.setOrderId(old.getId());
+            stockSaveParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
+            stockDetailService.save(stockSaveParam);
         }
         return this.getById(old.getId());
     }
