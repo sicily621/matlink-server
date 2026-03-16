@@ -11,6 +11,7 @@ import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.common.security.LoginHelper;
 import com.clt.matlink.modules.base.common.domain.entity.Stock;
 import com.clt.matlink.modules.base.common.domain.form.StockSaveParam;
+import com.clt.matlink.modules.base.common.service.StockDetailService;
 import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
 import com.clt.matlink.modules.enums.MateriaAuditStatusEnum;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
@@ -44,6 +45,8 @@ public class OutStockServiceImpl implements OutStockService {
     private OutStockDetailService outStockDetailService;
     @Autowired
     private AuditFlowRelationService auditFlowRelationService;
+    @Autowired
+    private StockDetailService stockDetailService;
     @Override
     public OutStock save(OutStockSaveParam outStock) {
         int flag = 0;
@@ -63,7 +66,13 @@ public class OutStockServiceImpl implements OutStockService {
             outStock.setAuditTime(auditFlowRelation.getAuditTime());
             outStock.setAuditUserId(auditFlowRelation.getAuditUserId());
             outStockMapper.updateById(outStock);
-            // TODO 是否直接入库
+            // 直接出库
+            if(outStock.getIsDirect()==1 && auditFlowRelation.getAuditStatus()== MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()){
+                StockSaveParam stockSaveParam = new StockSaveParam();
+                stockSaveParam.setOrderId(outStock.getId());
+                stockSaveParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_OUT_STOCK.getValue());
+                stockDetailService.save(stockSaveParam);
+            }
         }else{
             flag = outStockMapper.updateById(outStock);
         }
