@@ -15,10 +15,7 @@ public class StockDetail extends BaseEntity {
     private Long materialTypeId;
     private Long materialId;
     private BigDecimal count;
-    private BigDecimal lockCount;
-    private BigDecimal useCount;
     private Date stockTime;
-    private BigDecimal transitCount;
     private BigDecimal costPrice;
     private BigDecimal totalCostPrice;
 }

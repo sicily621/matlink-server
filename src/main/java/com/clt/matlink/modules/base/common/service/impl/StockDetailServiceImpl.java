@@ -136,16 +136,7 @@ public class StockDetailServiceImpl implements StockDetailService {
                                         outStockDetail.getStockId(), outStockDetail.getMaterialId(),
                                         outStockDetail.getActualCount(), stockDetail.getCount()));
                     }
-                    BigDecimal useCount = stockDetail.getUseCount().subtract(outStockDetail.getActualCount());
-                    if(useCount.compareTo(BigDecimal.ZERO)<0){
-                        throw new ServiceException(
-                                StrUtil.format("物料库存可用数量不足,stockId={},materialId={},出库数量={},库存数量={}",
-                                        outStockDetail.getStockId(), outStockDetail.getMaterialId(),
-                                        outStockDetail.getActualCount(), stockDetail.getUseCount()));
-                    }
-
                     stockDetail.setCount(count);
-                    stockDetail.setUseCount(useCount);
                     stockDetail.setStockTime(new Date());
                     stockDetail.setTotalCostPrice(stockDetail.getCount().multiply(stockDetail.getCostPrice()));
                     stockDetailMapper.updateById(stockDetail);
@@ -177,6 +168,13 @@ public class StockDetailServiceImpl implements StockDetailService {
             OutBoundApply outBoundApply = outBoundApplyService.getById(resourceId);
             outBoundApply.setStatus(MaterialOutBoundApplyStatusEnum.OUT_BOUND.getStatus());
             outBoundApplyService.save(outBoundApply);
+        }
+        //采购退货 修改采购单状态为已退货
+        if(outStock.getType().equals(2)){
+            Long resourceId = outStock.getOriginOrderId();
+            Purchase oldPurchase = purchaseService.getById(resourceId);
+            oldPurchase.setStatus(PurchasingStatusEnum.RETURNED.getStatus());
+            purchaseService.save(oldPurchase);
         }
         return stockDetails;
     }
@@ -226,6 +224,13 @@ public class StockDetailServiceImpl implements StockDetailService {
             oldPurchasing.setStatus(PurchasingStatusEnum.IN_STOCK.getStatus());
             purchaseService.save(oldPurchasing);
         }
+        //领用归还
+        if(inStock.getType().equals(3)){
+            Long resourceId = inStock.getOriginOrderId();
+            OutBoundApply oldOutBoundApply = outBoundApplyService.getById(resourceId);
+            oldOutBoundApply.setStatus(MaterialOutBoundApplyStatusEnum.RETURNED.getStatus());
+            outBoundApplyService.save(oldOutBoundApply);
+        }
         return stockDetails;
     }
 
@@ -243,10 +248,7 @@ public class StockDetailServiceImpl implements StockDetailService {
             newStockDetail.setMaterialTypeId(material.getMaterialTypeId());
             newStockDetail.setMaterialId(inStockDetail.getMaterialId());
             newStockDetail.setCount(inStockDetail.getActualCount());
-            newStockDetail.setLockCount(BigDecimal.ZERO);
-            newStockDetail.setUseCount(inStockDetail.getActualCount());
             newStockDetail.setStockTime(new Date());
-            newStockDetail.setTransitCount(BigDecimal.ZERO);
             newStockDetail.setCostPrice(inStockDetail.getPerPrice());
             newStockDetail.setTotalCostPrice(inStockDetail.getInStockPrice());
             stockDetailMapper.insert(newStockDetail);
@@ -260,7 +262,6 @@ public class StockDetailServiceImpl implements StockDetailService {
                 stockDetail.setCostPrice(inventoryAmount.divide(inventoryCount, 2, RoundingMode.HALF_UP));
             }
             stockDetail.setCount(stockDetail.getCount().add(inStockDetail.getActualCount()));
-            stockDetail.setUseCount(stockDetail.getUseCount().add(inStockDetail.getActualCount()));
             stockDetail.setStockTime(new Date());
             stockDetail.setTotalCostPrice(stockDetail.getCount().multiply(stockDetail.getCostPrice()));
             stockDetailMapper.updateById(stockDetail);
@@ -293,7 +294,6 @@ public class StockDetailServiceImpl implements StockDetailService {
                 } else {
                     //更新库存详情记录
                     stockDetail.setCount(taskDetail.getRealCount());
-                    stockDetail.setUseCount(taskDetail.getRealCount());
                     stockDetail.setStockTime(new Date());
                     stockDetailMapper.updateById(stockDetail);
                 }

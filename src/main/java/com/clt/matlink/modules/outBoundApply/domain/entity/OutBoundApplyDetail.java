@@ -13,5 +13,4 @@ public class OutBoundApplyDetail  extends BaseEntity {
     private Long applyId;
     private Long materialId;
     private BigDecimal applyCount;
-    private BigDecimal actualCount;
 }

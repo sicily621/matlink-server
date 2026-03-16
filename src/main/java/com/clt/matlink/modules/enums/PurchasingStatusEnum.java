@@ -15,6 +15,7 @@ public enum PurchasingStatusEnum {
     PURCHASED(1, "已采购"),
     ABANDONED(2, "已废弃"),
     IN_STOCK(3, "已入库"),
+    RETURNED(4,"已归还"),
     ;
     private final int status;
     private final String name;

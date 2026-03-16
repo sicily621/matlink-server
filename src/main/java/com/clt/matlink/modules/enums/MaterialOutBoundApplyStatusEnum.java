@@ -9,11 +9,12 @@ import lombok.Getter;
 @Getter
 public enum MaterialOutBoundApplyStatusEnum {
     /**
-     * 申请状态:0-未领料，1-已领料,2-废弃
+     * 申请状态:0-未领料，1-已领料,2-废弃,3已归还
      */
     UN_OUT_BOUND(0, "未领料"),
     OUT_BOUND(1, "已领料"),
-    ABANDON(2, "废弃");
+    ABANDON(2, "废弃"),
+    RETURNED(3,"已归还");
     private final int status;
     private final String name;
 
