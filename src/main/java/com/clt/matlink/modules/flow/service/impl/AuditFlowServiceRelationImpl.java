@@ -149,6 +149,7 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MaterialAuditRelationGenerateResult generateAuditFlowRelation(MaterialAuditRelationGenerateParam generateParam) {
+        // 根据部门、物料库、业务类型获取配置好的审批流程
         AuditFlowForm auditFlowForm = new AuditFlowForm();
         auditFlowForm.setDeptId(generateParam.getDeptId());
         auditFlowForm.setType(generateParam.getType());
@@ -156,11 +157,13 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
         AuditFlow auditFlow = auditFlowService.getByCondition(auditFlowForm);
 
         List<AuditFlowDetail> auditFlowDetailList = null;
+        // 获取审批流程下的审批步骤
         if (auditFlow != null) {
             AuditFlowDetailForm auditFlowDetailForm = new AuditFlowDetailForm();
             auditFlowDetailForm.setFlowId(auditFlow.getId());
             auditFlowDetailList = auditFlowDetailService.list(auditFlowDetailForm);
         }
+        // 生成默认审批记录 审批状态是待审批 当前审批层级从1开始
         Date now = new Date();
         AuditFlowRelation auditFlowRelation = new AuditFlowRelation();
         auditFlowRelation.setStockId(generateParam.getStockId());
@@ -174,14 +177,14 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
 
         //没有审批步骤或者审批流程禁用，直接审批通过
         if (CollUtil.isEmpty(auditFlowDetailList) || auditFlow.getEnable() == 0) {
-            Long currentUserId = LoginHelper.getLoginEmployeeId();
             Employee currentUser = LoginHelper.getLoginEmployee();
-
+            //修改审批记录是通过
             auditFlowRelation.setEnable(0);
             auditFlowRelation.setAuditStatus(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus());
             auditFlowRelation.setAuditTime(now);
             auditFlowRelation.setAuditUserId(LoginHelper.getLoginEmployeeId());
             this.save(auditFlowRelation);
+            //默认生成一条审批记录的详情，审批人是当前登录人、审批状态是通过
             AuditFlowDetailRelation auditFlowDetailRelation = new AuditFlowDetailRelation();
             auditFlowDetailRelation.setFlowId(auditFlowRelation.getId());
             auditFlowDetailRelation.setOrderId(generateParam.getOrderId());
@@ -195,7 +198,7 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
             auditFlowDetailRelation.setAuditStatus(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus());
             auditFlowDetailRelationService.save(auditFlowDetailRelation);
         } else {
-            //有审批步骤，则遍历步骤存入审批记录
+            //有审批步骤，则遍历步骤存入审批记录的详情表 审批状态都是待审批
             List<AuditFlowDetailRelation> auditFlowDetails = Lists.newArrayList();
             for (AuditFlowDetail auditFlowDetail : auditFlowDetailList) {
                 AuditFlowDetailRelation auditFlowDetailRelation = new AuditFlowDetailRelation();
@@ -213,14 +216,18 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
                 auditFlowDetailRelation.setAuditStatus(MateriaAuditStatusEnum.AUDIT_AWAIT.getStatus());
                 auditFlowDetails.add(auditFlowDetailRelation);
             }
+            //修改第一条审批记录详情的审批状态为进行中
             auditFlowDetails.get(0).setAuditStatus(MateriaAuditStatusEnum.AUDIT_BEING.getStatus());
             auditFlowDetailRelationService.batchSave(auditFlowDetails);
         }
-
+        // 返回审批记录
         MaterialAuditRelationGenerateResult materialAuditRelationGenerateResult = new MaterialAuditRelationGenerateResult();
         materialAuditRelationGenerateResult.setAuditFlowRelation(auditFlowRelation);
         return materialAuditRelationGenerateResult;
     }
+    /*
+    * 处理审批步骤、流程
+    * */
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -233,14 +240,18 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
         if(vo.getAuditStatus()==null){
             throw new ServiceException("审批状态不能为空");
         }
+        //获取当前登录人信息
         Long loginEmployeeId = LoginHelper.getLoginEmployeeId();
         Employee loginEmployee = LoginHelper.getLoginEmployee();
         Long departmentId = loginEmployee.getDepartmentId();
         Long roleId = loginEmployee.getRoleId();
         vo.setCurrentUserId(loginEmployeeId);
+
+        //获取默认审批记录
         LambdaQueryWrapper<AuditFlowRelation> lqw = Wrappers.lambdaQuery();
         lqw.eq(AuditFlowRelation::getOrderId, orderId);
         AuditFlowRelation auditFlowRelation = auditFlowRelationMapper.selectOne(lqw);
+
         if(auditFlowRelation==null){
             throw new ServiceException("未找到对应的审批流程");
         }
