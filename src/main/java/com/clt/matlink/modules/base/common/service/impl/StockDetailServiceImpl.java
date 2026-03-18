@@ -105,13 +105,18 @@ public class StockDetailServiceImpl implements StockDetailService {
      * @return
      */
     private List<StockDetail> handleOutStock(Long orderId) {
+        // 查询出库单
         OutStock outStock = outStockService.getById(orderId);
         List<StockDetail> stockDetails = Lists.newArrayList();
+        // 判断出库单审批状态是否审批通过
         if (outStock.getAuditStatus() == MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()) {
+            // 获取出库单详情
             OutStockDetailForm outStockDetailForm = new OutStockDetailForm();
             outStockDetailForm.setOutStockId(orderId);
             List<OutStockDetail> outStockDetails = outStockDetailService.list(outStockDetailForm);
+            // 遍历出库详情 生成出库物料的流水
             for (OutStockDetail outStockDetail : outStockDetails) {
+                //更新出库物料库存
                 StockDetail stockDetail = handleOutStockDetail(outStockDetail, outStock);
                 //库存流水
                 StockRecord stockRecord = new StockRecord();
@@ -119,6 +124,7 @@ public class StockDetailServiceImpl implements StockDetailService {
                 stockRecord.setRelatedOrderId(outStockDetail.getOutStockId());
                 stockRecord.setMaterialId(outStockDetail.getMaterialId());
                 stockRecord.setStockId(outStockDetail.getStockId());
+                //变化数量取负数
                 stockRecord.setQuantityChange(outStockDetail.getActualCount().negate());
                 stockRecord.setBalanceAfter(stockDetail.getCount());
                 stockRecord.setCostPrice(stockDetail.getCostPrice());
@@ -155,6 +161,7 @@ public class StockDetailServiceImpl implements StockDetailService {
 
     @Lock4j(keys = {"#outStockDetail.getStockId()", "#outStockDetail.getMaterialId()"})
     public StockDetail handleOutStockDetail(OutStockDetail outStockDetail, OutStock outStock) {
+        //查询出库物料集合
         StockDetailForm stockDetailForm = new StockDetailForm();
         stockDetailForm.setStockId(outStockDetail.getStockId());
         stockDetailForm.setMaterialId(outStockDetail.getMaterialId());
@@ -171,8 +178,9 @@ public class StockDetailServiceImpl implements StockDetailService {
                 BigDecimal inventoryCount = stockDetail.getCount().subtract(outStockDetail.getActualCount());
                 stockDetail.setCostPrice(inventoryAmount.divide(inventoryCount,2, RoundingMode.HALF_UP));
             }
-            //更新库存详情记录
+            //更新库存详情记录 当前库存数量-出库数量
             BigDecimal count = stockDetail.getCount().subtract(outStockDetail.getActualCount());
+            //出库数量不能大于库存数量
             if(count.compareTo(BigDecimal.ZERO)<0){
                 throw new ServiceException(
                         StrUtil.format("物料库存数量不足,stockId={},materialId={},出库数量={},库存数量={}",
@@ -181,6 +189,7 @@ public class StockDetailServiceImpl implements StockDetailService {
             }
             stockDetail.setCount(count);
             stockDetail.setStockTime(new Date());
+            //库存总价=库存数量*单价
             stockDetail.setTotalCostPrice(stockDetail.getCount().multiply(stockDetail.getCostPrice()));
             stockDetailMapper.updateById(stockDetail);
         }
@@ -203,6 +212,7 @@ public class StockDetailServiceImpl implements StockDetailService {
             inStockDetailForm.setInStockId(orderId);
             List<InStockDetail> inStockDetails = inStockDetailService.list(inStockDetailForm);
             for (InStockDetail inStockDetail : inStockDetails) {
+                //更新入库物料库存 数据
                 StockDetail stockDetail = handleInStockDetail(inStockDetail, inStock);
                 //库存流水
                 StockRecord stockRecord = new StockRecord();
