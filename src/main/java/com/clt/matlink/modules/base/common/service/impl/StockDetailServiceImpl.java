@@ -112,35 +112,7 @@ public class StockDetailServiceImpl implements StockDetailService {
             outStockDetailForm.setOutStockId(orderId);
             List<OutStockDetail> outStockDetails = outStockDetailService.list(outStockDetailForm);
             for (OutStockDetail outStockDetail : outStockDetails) {
-                StockDetailForm stockDetailForm = new StockDetailForm();
-                stockDetailForm.setStockId(outStockDetail.getStockId());
-                stockDetailForm.setMaterialId(outStockDetail.getMaterialId());
-                StockDetail stockDetail = this.getByConditions(stockDetailForm);
-                if (stockDetail == null) {
-                    throw new ServiceException(
-                            StrUtil.format("出库物料不存在,stockId={},materialId={}",
-                                    outStockDetail.getStockId(), outStockDetail.getMaterialId()));
-                } else {
-                    //采购退货出库，重新核算成本
-                    if(outStock.getType().equals(2)){
-                        // 新成本单价=（原成本单价*原库存数量-出库单价*出库数量）/ 剩余库存数量
-                        BigDecimal inventoryAmount = stockDetail.getCostPrice().multiply(stockDetail.getCount()).subtract(outStockDetail.getPerPrice().multiply(outStockDetail.getActualCount()));
-                        BigDecimal inventoryCount = stockDetail.getCount().subtract(outStockDetail.getActualCount());
-                        stockDetail.setCostPrice(inventoryAmount.divide(inventoryCount,2, RoundingMode.HALF_UP));
-                    }
-                    //更新库存详情记录
-                    BigDecimal count = stockDetail.getCount().subtract(outStockDetail.getActualCount());
-                    if(count.compareTo(BigDecimal.ZERO)<0){
-                        throw new ServiceException(
-                                StrUtil.format("物料库存数量不足,stockId={},materialId={},出库数量={},库存数量={}",
-                                        outStockDetail.getStockId(), outStockDetail.getMaterialId(),
-                                        outStockDetail.getActualCount(), stockDetail.getCount()));
-                    }
-                    stockDetail.setCount(count);
-                    stockDetail.setStockTime(new Date());
-                    stockDetail.setTotalCostPrice(stockDetail.getCount().multiply(stockDetail.getCostPrice()));
-                    stockDetailMapper.updateById(stockDetail);
-                }
+                StockDetail stockDetail = handleOutStockDetail(outStockDetail, outStock);
                 //库存流水
                 StockRecord stockRecord = new StockRecord();
                 stockRecord.setType(MateriaAuditResourceTypeEnum.MATERIAL_OUT_STOCK.getValue());
@@ -179,6 +151,40 @@ public class StockDetailServiceImpl implements StockDetailService {
         }
 
         return stockDetails;
+    }
+
+    @Lock4j(keys = {"#outStockDetail.getStockId()", "#outStockDetail.getMaterialId()"})
+    public StockDetail handleOutStockDetail(OutStockDetail outStockDetail, OutStock outStock) {
+        StockDetailForm stockDetailForm = new StockDetailForm();
+        stockDetailForm.setStockId(outStockDetail.getStockId());
+        stockDetailForm.setMaterialId(outStockDetail.getMaterialId());
+        StockDetail stockDetail = this.getByConditions(stockDetailForm);
+        if (stockDetail == null) {
+            throw new ServiceException(
+                    StrUtil.format("出库物料不存在,stockId={},materialId={}",
+                            outStockDetail.getStockId(), outStockDetail.getMaterialId()));
+        } else {
+            //采购退货出库，重新核算成本
+            if(outStock.getType().equals(2)){
+                // 新成本单价=（原成本单价*原库存数量-出库单价*出库数量）/ 剩余库存数量
+                BigDecimal inventoryAmount = stockDetail.getCostPrice().multiply(stockDetail.getCount()).subtract(outStockDetail.getPerPrice().multiply(outStockDetail.getActualCount()));
+                BigDecimal inventoryCount = stockDetail.getCount().subtract(outStockDetail.getActualCount());
+                stockDetail.setCostPrice(inventoryAmount.divide(inventoryCount,2, RoundingMode.HALF_UP));
+            }
+            //更新库存详情记录
+            BigDecimal count = stockDetail.getCount().subtract(outStockDetail.getActualCount());
+            if(count.compareTo(BigDecimal.ZERO)<0){
+                throw new ServiceException(
+                        StrUtil.format("物料库存数量不足,stockId={},materialId={},出库数量={},库存数量={}",
+                                outStockDetail.getStockId(), outStockDetail.getMaterialId(),
+                                outStockDetail.getActualCount(), stockDetail.getCount()));
+            }
+            stockDetail.setCount(count);
+            stockDetail.setStockTime(new Date());
+            stockDetail.setTotalCostPrice(stockDetail.getCount().multiply(stockDetail.getCostPrice()));
+            stockDetailMapper.updateById(stockDetail);
+        }
+        return stockDetail;
     }
 
     /**
