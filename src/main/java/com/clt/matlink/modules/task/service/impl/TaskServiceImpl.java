@@ -67,7 +67,6 @@ public class TaskServiceImpl implements TaskService {
             task.setAuditTime(auditFlowRelation.getAuditTime());
             task.setAuditUserId(auditFlowRelation.getAuditUserId());
             taskMapper.updateById(task);
-            // TODO
         }else{
             flag = taskMapper.updateById(task);
         }

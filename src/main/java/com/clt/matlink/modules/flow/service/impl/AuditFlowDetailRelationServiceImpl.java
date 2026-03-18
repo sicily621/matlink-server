@@ -62,13 +62,17 @@ public class AuditFlowDetailRelationServiceImpl implements AuditFlowDetailRelati
         LambdaQueryWrapper<AuditFlowDetailRelation> lqw = getQueryWrapper(form);
         return auditFlowDetailRelationMapper.selectList(lqw);
     }
-
+    /*
+    查询当前用户正在审批中的流程记录
+    * */
     @Override
     public List<AuditFlowDetailRelation> listAuditBeingDetail(AuditFlowDetailRelationForm form) {
         Long userIdParam = form.getUserId();
+        //先匹配审批中、角色、物料库，业务类型 因为参数里有用户Id,有的审批步骤是指定到角色，用户Id是空，所以先把用户id置空
         form.setUserId(null);
         form.setAuditStatus(MateriaAuditStatusEnum.AUDIT_BEING.getStatus());
         List<AuditFlowDetailRelation> list = this.list(form);
+        //再根据用户过滤
         return list.stream()
                 .filter(auditFlowDetailRelation -> {
                     Long userId = auditFlowDetailRelation.getUserId();

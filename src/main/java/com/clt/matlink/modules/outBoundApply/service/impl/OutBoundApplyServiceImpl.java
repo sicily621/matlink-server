@@ -59,7 +59,6 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
             outBoundApply.setAuditTime(auditFlowRelation.getAuditTime());
             outBoundApply.setAuditUserId(auditFlowRelation.getAuditUserId());
             outBoundApplyMapper.updateById(outBoundApply);
-            // TODO 是否直接入库
         }else{
             flag = outBoundApplyMapper.updateById(outBoundApply);
         }
@@ -164,11 +163,6 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
         entity.setAuditTime(flowRelation.getAuditTime());
         entity.setAuditUserId(generateParam.getCurrentUserId());
         this.save(entity);
-        //审批通过
-        if (entity.getAuditStatus().equals(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus())) {
-            // TODO 判断是否直接出库
-//            dealDirectInStock(entity.getId());
-        }
         return this.getById(old.getId());
     }
     @Override

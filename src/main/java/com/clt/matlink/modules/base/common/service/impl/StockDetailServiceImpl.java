@@ -156,26 +156,28 @@ public class StockDetailServiceImpl implements StockDetailService {
                 stockRecordService.save(stockRecord);
                 stockDetails.add(stockDetail);
             }
-        }
-        //修改库存状态审批状态 已出库
-        outStock.setStatus(MateriaInOrOutStockStatusEnum.IN_OR_OUT_STOCK.getValue());
-        OutStockSaveParam outStockSaveParam = BeanUtil.copyProperties(outStock, OutStockSaveParam.class);
-        outStockService.save(outStockSaveParam);
 
-        //领料状态修改为已出库
-        if(outStock.getType().equals(1)){
-            Long resourceId = outStock.getOriginOrderId();
-            OutBoundApply outBoundApply = outBoundApplyService.getById(resourceId);
-            outBoundApply.setStatus(MaterialOutBoundApplyStatusEnum.OUT_BOUND.getStatus());
-            outBoundApplyService.save(outBoundApply);
+            //修改库存状态审批状态 已出库
+            outStock.setStatus(MateriaInOrOutStockStatusEnum.IN_OR_OUT_STOCK.getValue());
+            OutStockSaveParam outStockSaveParam = BeanUtil.copyProperties(outStock, OutStockSaveParam.class);
+            outStockService.save(outStockSaveParam);
+
+            //领料状态修改为已出库
+            if(outStock.getType().equals(1)){
+                Long resourceId = outStock.getOriginOrderId();
+                OutBoundApply outBoundApply = outBoundApplyService.getById(resourceId);
+                outBoundApply.setStatus(MaterialOutBoundApplyStatusEnum.OUT_BOUND.getStatus());
+                outBoundApplyService.save(outBoundApply);
+            }
+            //采购退货 修改采购单状态为已退货
+            if(outStock.getType().equals(2)){
+                Long resourceId = outStock.getOriginOrderId();
+                Purchase oldPurchase = purchaseService.getById(resourceId);
+                oldPurchase.setStatus(PurchasingStatusEnum.RETURNED.getStatus());
+                purchaseService.save(oldPurchase);
+            }
         }
-        //采购退货 修改采购单状态为已退货
-        if(outStock.getType().equals(2)){
-            Long resourceId = outStock.getOriginOrderId();
-            Purchase oldPurchase = purchaseService.getById(resourceId);
-            oldPurchase.setStatus(PurchasingStatusEnum.RETURNED.getStatus());
-            purchaseService.save(oldPurchase);
-        }
+
         return stockDetails;
     }
 
@@ -190,6 +192,7 @@ public class StockDetailServiceImpl implements StockDetailService {
         List<StockDetail> stockDetails = Lists.newArrayList();
         //入库单 审批通过
         if (inStock.getAuditStatus() == MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()) {
+            //查询入库单详情
             InStockDetailForm inStockDetailForm = new InStockDetailForm();
             inStockDetailForm.setInStockId(orderId);
             List<InStockDetail> inStockDetails = inStockDetailService.list(inStockDetailForm);
@@ -210,27 +213,30 @@ public class StockDetailServiceImpl implements StockDetailService {
                 stockRecordService.save(stockRecord);
                 stockDetails.add(stockDetail);
             }
-        }
-        //修改库存状态审批状态 已入库
-        inStock.setStatus(MateriaInOrOutStockStatusEnum.IN_OR_OUT_STOCK.getValue());
-        InStockSaveParam inStockSaveParam = BeanUtil.copyProperties(inStock, InStockSaveParam.class);
-        inStockService.save(inStockSaveParam);
 
-        //采购单
-        if(inStock.getType().equals(2)){
-            //采购状态修改为已入库
-            Long resourceId = inStock.getOriginOrderId();
-            Purchase oldPurchasing = purchaseService.getById(resourceId);
-            oldPurchasing.setStatus(PurchasingStatusEnum.IN_STOCK.getStatus());
-            purchaseService.save(oldPurchasing);
+
+            //修改库存状态审批状态 已入库
+            inStock.setStatus(MateriaInOrOutStockStatusEnum.IN_OR_OUT_STOCK.getValue());
+            InStockSaveParam inStockSaveParam = BeanUtil.copyProperties(inStock, InStockSaveParam.class);
+            inStockService.save(inStockSaveParam);
+
+            //采购单
+            if(inStock.getType().equals(2)){
+                //采购状态修改为已入库
+                Long resourceId = inStock.getOriginOrderId();
+                Purchase oldPurchasing = purchaseService.getById(resourceId);
+                oldPurchasing.setStatus(PurchasingStatusEnum.IN_STOCK.getStatus());
+                purchaseService.save(oldPurchasing);
+            }
+            //领用归还
+            if(inStock.getType().equals(3)){
+                Long resourceId = inStock.getOriginOrderId();
+                OutBoundApply oldOutBoundApply = outBoundApplyService.getById(resourceId);
+                oldOutBoundApply.setStatus(MaterialOutBoundApplyStatusEnum.RETURNED.getStatus());
+                outBoundApplyService.save(oldOutBoundApply);
+            }
         }
-        //领用归还
-        if(inStock.getType().equals(3)){
-            Long resourceId = inStock.getOriginOrderId();
-            OutBoundApply oldOutBoundApply = outBoundApplyService.getById(resourceId);
-            oldOutBoundApply.setStatus(MaterialOutBoundApplyStatusEnum.RETURNED.getStatus());
-            outBoundApplyService.save(oldOutBoundApply);
-        }
+
         return stockDetails;
     }
 
@@ -278,7 +284,9 @@ public class StockDetailServiceImpl implements StockDetailService {
     private List<StockDetail> handleTask(Long orderId) {
         Task task = taskService.getById(orderId);
         List<StockDetail> stockDetails = Lists.newArrayList();
+        //审批通过
         if (task.getAuditStatus() == MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus()) {
+            //获取盘点任务详情
             TaskDetailForm taskDetailForm = new TaskDetailForm();
             taskDetailForm.setTaskId(orderId);
             List<TaskDetail> taskDetails = taskDetailService.list(taskDetailForm);

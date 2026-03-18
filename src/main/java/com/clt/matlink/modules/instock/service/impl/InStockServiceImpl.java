@@ -48,22 +48,28 @@ public class InStockServiceImpl implements InStockService {
     public InStock save(InStockSaveParam inStock) {
         int flag = 0;
         if(inStock.getId()==null){
-            //生成审批流
+            //保存入库单
             flag= inStockMapper.insert(inStock);
+            //生成审批流
             MaterialAuditRelationGenerateParam generateParam = new MaterialAuditRelationGenerateParam();
             generateParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
             generateParam.setStockId(inStock.getStockId());
             generateParam.setOrderId(inStock.getId());
             generateParam.setDeptId(inStock.getDeptId());
-
-
             MaterialAuditRelationGenerateResult generateResult = auditFlowRelationService.generateAuditFlowRelation(generateParam);
             AuditFlowRelation auditFlowRelation = generateResult.getAuditFlowRelation();
+            //更改入库单审批状态
             inStock.setAuditStatus(auditFlowRelation.getAuditStatus());
             inStock.setAuditTime(auditFlowRelation.getAuditTime());
             inStock.setAuditUserId(auditFlowRelation.getAuditUserId());
             inStockMapper.updateById(inStock);
-
+            //如果审批通过(没有审批流程)，而且入库单是直接入库
+            if(auditFlowRelation.getAuditStatus()==MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus() && inStock.getIsDirect()==1){
+                StockSaveParam stockSaveParam = new StockSaveParam();
+                stockSaveParam.setOrderId(inStock.getId());
+                stockSaveParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
+                stockDetailService.save(stockSaveParam);
+            }
         }else{
             flag = inStockMapper.updateById(inStock);
         }

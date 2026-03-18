@@ -67,6 +67,14 @@ public class OutStockServiceImpl implements OutStockService {
             outStock.setAuditUserId(auditFlowRelation.getAuditUserId());
             outStockMapper.updateById(outStock);
 
+            //如果审批通过(没有审批流程)，而且出库单是直接出库
+            if(auditFlowRelation.getAuditStatus()==MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus() && outStock.getIsDirect()==1){
+                StockSaveParam stockSaveParam = new StockSaveParam();
+                stockSaveParam.setOrderId(outStock.getId());
+                stockSaveParam.setType(MateriaAuditResourceTypeEnum.MATERIAL_OUT_STOCK.getValue());
+                stockDetailService.save(stockSaveParam);
+            }
+
         }else{
             flag = outStockMapper.updateById(outStock);
         }

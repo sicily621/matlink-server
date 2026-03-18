@@ -42,17 +42,19 @@ public class PurchaseServiceImpl implements PurchaseService {
     public Purchase save(Purchase purchase) {
         int flag = 0;
         if(purchase.getId()==null){
-            //生成审批流
+            //保存采购单
             flag= purchaseMapper.insert(purchase);
+
+            //生成审批单和审批记录
             MaterialAuditRelationGenerateParam generateParam = new MaterialAuditRelationGenerateParam();
             generateParam.setType(MateriaAuditResourceTypeEnum.PURCHASING.getValue());
             generateParam.setStockId(purchase.getStockId());
             generateParam.setOrderId(purchase.getId());
             generateParam.setDeptId(purchase.getDeptId());
-
-
             MaterialAuditRelationGenerateResult generateResult = auditFlowRelationService.generateAuditFlowRelation(generateParam);
             AuditFlowRelation auditFlowRelation = generateResult.getAuditFlowRelation();
+
+            //设置采购单的审批状态
             purchase.setAuditStatus(auditFlowRelation.getAuditStatus());
             purchase.setAuditTime(auditFlowRelation.getAuditTime());
             purchase.setAuditUserId(auditFlowRelation.getAuditUserId());
@@ -105,14 +107,13 @@ public class PurchaseServiceImpl implements PurchaseService {
         AuditFlowRelationCurrentUserQuery flowRelationCurrentUserQuery = new AuditFlowRelationCurrentUserQuery();
         flowRelationCurrentUserQuery.setType(MateriaAuditResourceTypeEnum.PURCHASING.getValue());
         flowRelationCurrentUserQuery.setStockId(form.getStockId());
+        //当前用户能审批的关联单Id列表
         List<Long> beingOrderIds = auditFlowRelationService.listAuditBeingOrderIdsByCurrentUser(flowRelationCurrentUserQuery);
         for (PurchaseVo purchaseVo : list) {
             if(beingOrderIds.contains(purchaseVo.getId())){
                 purchaseVo.setHasAuditAuth(true);//当前登陆人有待审批
             }
-            if (purchaseVo.getApplyUserId().equals(userId)) {
-                purchaseVo.setHasInStockAuth(true);//当前登陆人有入库权限
-            }
+
         }
         return tableDataInfo;
     }
@@ -147,11 +148,6 @@ public class PurchaseServiceImpl implements PurchaseService {
         entity.setAuditTime(flowRelation.getAuditTime());
         entity.setAuditUserId(generateParam.getCurrentUserId());
         this.save(entity);
-        //审批通过
-        if (entity.getAuditStatus().equals(MateriaAuditStatusEnum.AUDIT_SUCCESS.getStatus())) {
-            // TODO 判断是否直接入库
-//            dealDirectInStock(entity.getId());
-        }
         return this.getById(old.getId());
     }
 
