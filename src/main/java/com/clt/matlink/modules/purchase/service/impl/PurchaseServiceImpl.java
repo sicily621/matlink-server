@@ -113,6 +113,9 @@ public class PurchaseServiceImpl implements PurchaseService {
             if(beingOrderIds.contains(purchaseVo.getId())){
                 purchaseVo.setHasAuditAuth(true);//当前登陆人有待审批
             }
+            if (purchaseVo.getApplyUserId().equals(userId)) {
+                purchaseVo.setHasPurchaseAuth(true);//当前登陆人有采购权限
+            }
 
         }
         return tableDataInfo;

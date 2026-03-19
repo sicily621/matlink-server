@@ -9,6 +9,6 @@ import lombok.Data;
 public class PurchaseVo extends Purchase {
     @Schema(description = "当前登陆人是否有权限审批")
     private Boolean hasAuditAuth = false;
-    @Schema(description = "当前登陆人是否有权限入库")
-    private Boolean hasInStockAuth = false;
+    @Schema(description = "当前登陆人是否有权限采购")
+    private Boolean hasPurchaseAuth = false;
 }
