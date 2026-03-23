@@ -1,62 +1,65 @@
 package com.clt.matlink.modules.websocket.handler;
 
+import com.clt.matlink.common.security.LoginHelper;
 import com.clt.matlink.modules.websocket.manager.WebSocketManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.messaging.*;
+import org.springframework.web.socket.messaging.SessionConnectEvent;
+import org.springframework.web.socket.messaging.SessionConnectedEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+/**
+ * WebSocket 事件监听器
+ * 处理连接、断开等生命周期事件
+ *
+ * @author zm
+ */
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class WebSocketEventListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketEventListener.class);
+    private final WebSocketManager webSocketManager;
 
-    @Autowired
-    private WebSocketManager webSocketManager;
-
+    /**
+     * 处理连接建立事件
+     */
     @EventListener
-    public void handleConnectListener(SessionConnectEvent event) {
+    public void handleConnectEvent(SessionConnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = accessor.getSessionId();
-        logger.info("WebSocket 连接建立，SessionId: {}", sessionId);
+        log.info("WebSocket 连接建立，SessionId: {}", sessionId);
     }
 
+    /**
+     * 处理连接成功事件
+     */
     @EventListener
-    public void handleConnectedListener(SessionConnectedEvent event) {
+    public void handleConnectedEvent(SessionConnectedEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = accessor.getSessionId();
 
-        Long employeeId = (Long) accessor.getSessionAttributes().get("employeeId");
-        if (employeeId != null) {
+        try {
+            Long employeeId = LoginHelper.getLoginEmployeeId();
             webSocketManager.connect(employeeId, sessionId);
-            logger.info("WebSocket 认证成功并连接，员工 ID: {}, SessionId: {}", employeeId, sessionId);
+            log.info("WebSocket 连接成功，员工 ID: {}, SessionId: {}", employeeId, sessionId);
+        } catch (Exception e) {
+            log.error("获取登录用户失败，SessionId: {}", sessionId, e);
         }
     }
 
+    /**
+     * 处理断开连接事件
+     */
     @EventListener
-    public void handleDisconnectListener(SessionDisconnectEvent event) {
+    public void handleDisconnectEvent(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = accessor.getSessionId();
 
+        log.info("WebSocket 断开连接，SessionId: {}", sessionId);
         webSocketManager.disconnect(sessionId);
-        logger.info("WebSocket 断开连接，SessionId: {}", sessionId);
-    }
-
-    @EventListener
-    public void handleSubscribeListener(SessionSubscribeEvent event) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        String sessionId = accessor.getSessionId();
-        String destination = accessor.getDestination();
-        logger.debug("订阅消息，SessionId: {}, 目的地：{}", sessionId, destination);
-    }
-
-    @EventListener
-    public void handleUnsubscribeListener(SessionUnsubscribeEvent event) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        String sessionId = accessor.getSessionId();
-        logger.debug("取消订阅，SessionId: {}", sessionId);
     }
 }
