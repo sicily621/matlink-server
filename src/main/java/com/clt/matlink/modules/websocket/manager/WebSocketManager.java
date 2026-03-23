@@ -1,6 +1,7 @@
 package com.clt.matlink.modules.websocket.manager;
 
 import com.clt.matlink.common.utils.SpringUtils;
+import com.clt.matlink.modules.websocket.domain.message.SessionInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -205,15 +206,5 @@ public class WebSocketManager {
         log.info("消息已读，MessageId: {}, EmployeeId: {}", messageId, employeeId);
     }
 
-    /**
-     * 会话信息
-     */
-    @lombok.Data
-    @lombok.experimental.Accessors(chain = true)
-    public static class SessionInfo {
-        private Long employeeId;
-        private String sessionId;
-        private Long lastActiveTime;
-        private Integer connectionCount;
-    }
+
 }

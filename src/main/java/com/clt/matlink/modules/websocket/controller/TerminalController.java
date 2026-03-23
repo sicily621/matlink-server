@@ -2,14 +2,16 @@
 //
 //import com.clt.matlink.common.domain.vo.Result;
 //import com.clt.matlink.common.security.LoginHelper;
+//import com.clt.matlink.modules.websocket.domain.message.SessionInfo;
 //import com.clt.matlink.modules.websocket.manager.WebSocketManager;
 //import com.clt.matlink.modules.websocket.utils.WebSocketSender;
 //import io.swagger.v3.oas.annotations.Operation;
 //import io.swagger.v3.oas.annotations.Parameter;
+//import io.swagger.v3.oas.annotations.tags.Tag;
 //import lombok.Data;
+//import lombok.RequiredArgsConstructor;
 //import lombok.experimental.Accessors;
 //import lombok.extern.slf4j.Slf4j;
-//import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.messaging.handler.annotation.DestinationVariable;
 //import org.springframework.messaging.handler.annotation.MessageMapping;
 //import org.springframework.messaging.handler.annotation.Payload;
@@ -18,26 +20,39 @@
 //import org.springframework.web.bind.annotation.GetMapping;
 //import org.springframework.web.bind.annotation.ResponseBody;
 //
+///**
+// * WebSocket 终端控制器
+// * 提供 WebSocket 连接管理和消息推送功能示例
+// *
+// * @author haiping.qi
+// */
 //@Slf4j
+//@Tag(name = "WebSocket 终端管理", description = "提供 WebSocket 连接管理和消息推送功能")
 //@Controller
+//@RequiredArgsConstructor
 //public class TerminalController {
 //
-//    @Autowired
-//    private WebSocketManager webSocketManager;
+//    private final WebSocketManager webSocketManager;
+//    private final WebSocketSender webSocketSender;
 //
-//    @Autowired
-//    private WebSocketSender webSocketSender;
-//
+//    /**
+//     * 心跳检测
+//     * 客户端定时发送心跳保持连接
+//     */
 //    @MessageMapping("/ping")
 //    @Operation(summary = "心跳检测", description = "客户端定时发送心跳保持连接")
 //    public void ping(StompHeaderAccessor stompHeaderAccessor) {
 //        Long employeeId = LoginHelper.getLoginEmployeeId();
-//        log.debug("心跳检测，员工 ID: {}", employeeId);
+//        String sessionId = stompHeaderAccessor.getSessionId();
 //
-//        // 可选：更新最后活跃时间
-//        webSocketManager.updateLastActiveTime(employeeId);
+//        log.debug("心跳检测，员工 ID: {}, SessionId: {}", employeeId, sessionId);
+//        webSocketManager.updateLastActiveTime(sessionId);
 //    }
 //
+//    /**
+//     * 订阅主题
+//     * 动态订阅指定主题的消息
+//     */
 //    @MessageMapping("/subscribe/{topic}")
 //    @Operation(summary = "订阅主题", description = "动态订阅指定主题的消息")
 //    public void subscribeTopic(@DestinationVariable String topic,
@@ -47,10 +62,14 @@
 //        log.info("员工 [{}] 订阅主题：{}", employeeId, topic);
 //
 //        // 发送订阅成功通知
-//        webSocketSender.sendToUser(employeeId, "/topic/system",
-//                new MessageWrapper("SUBSCRIBE_SUCCESS", "已订阅主题：" + topic));
+//        MessageWrapper response = new MessageWrapper("SUBSCRIBE_SUCCESS", "已订阅主题：" + topic);
+//        webSocketSender.sendToUser(employeeId, "/queue/system", response);
 //    }
 //
+//    /**
+//     * 取消订阅主题
+//     * 取消订阅指定主题的消息
+//     */
 //    @MessageMapping("/unsubscribe/{topic}")
 //    @Operation(summary = "取消订阅主题", description = "取消订阅指定主题的消息")
 //    public void unsubscribeTopic(@DestinationVariable String topic,
@@ -59,10 +78,14 @@
 //        Long employeeId = LoginHelper.getLoginEmployeeId();
 //        log.info("员工 [{}] 取消订阅主题：{}", employeeId, topic);
 //
-//        webSocketSender.sendToUser(employeeId, "/topic/system",
-//                new MessageWrapper("UNSUBSCRIBE_SUCCESS", "已取消订阅主题：" + topic));
+//        MessageWrapper response = new MessageWrapper("UNSUBSCRIBE_SUCCESS", "已取消订阅主题：" + topic);
+//        webSocketSender.sendToUser(employeeId, "/queue/system", response);
 //    }
 //
+//    /**
+//     * 发送消息
+//     * 通过 WebSocket 发送消息到服务器
+//     */
 //    @MessageMapping("/sendMessage")
 //    @Operation(summary = "发送消息", description = "通过 WebSocket 发送消息到服务器")
 //    public void sendMessage(@Payload MessageRequest messageRequest,
@@ -70,13 +93,49 @@
 //        Long employeeId = LoginHelper.getLoginEmployeeId();
 //        log.info("员工 [{}] 发送消息：{}", employeeId, messageRequest.getContent());
 //
-//        // 可以处理消息并广播给其他用户
+//        // 处理广播消息
 //        if ("BROADCAST".equals(messageRequest.getType())) {
-//            webSocketSender.sendToAll("/topic/notice",
-//                    new MessageWrapper("BROADCAST", messageRequest.getContent()));
+//            MessageWrapper response = new MessageWrapper("BROADCAST", messageRequest.getContent());
+//            webSocketSender.sendToAll("/topic/notice", response);
 //        }
 //    }
 //
+//    /**
+//     * 聊天消息
+//     * 处理聊天消息发送
+//     */
+//    @MessageMapping("/chat")
+//    @Operation(summary = "聊天消息", description = "处理聊天消息发送")
+//    public void sendChatMessage(@Payload ChatMessage chatMessage,
+//                                StompHeaderAccessor headerAccessor) {
+//        Long fromEmployeeId = LoginHelper.getLoginEmployeeId();
+//        log.info("员工 [{}] 发送聊天消息给员工 [{}]: {}",
+//                fromEmployeeId, chatMessage.getToUserId(), chatMessage.getContent());
+//
+//        // 发送给指定用户
+//        ChatMessage response = new ChatMessage(fromEmployeeId, chatMessage.getContent());
+//        webSocketSender.sendChatMessage(chatMessage.getToUserId(), response);
+//    }
+//
+//    /**
+//     * 消息确认
+//     * 客户端确认已收到消息
+//     */
+//    @MessageMapping("/ack")
+//    @Operation(summary = "消息确认", description = "客户端确认已收到消息")
+//    public void acknowledgeMessage(@Payload AckMessage ackMessage,
+//                                   StompHeaderAccessor headerAccessor) {
+//        Long employeeId = LoginHelper.getLoginEmployeeId();
+//        log.info("员工 [{}] 确认消息：{}", employeeId, ackMessage.getMessageId());
+//
+//        // 记录消息已读状态
+//        webSocketManager.markMessageAsRead(ackMessage.getMessageId(), employeeId);
+//    }
+//
+//    /**
+//     * 查询在线状态
+//     * 检查指定员工是否在线
+//     */
 //    @GetMapping("/online-status")
 //    @ResponseBody
 //    @Operation(summary = "查询在线状态", description = "检查指定员工是否在线")
@@ -87,6 +146,10 @@
 //        return Result.success(online);
 //    }
 //
+//    /**
+//     * 在线人数统计
+//     * 获取当前在线用户数量
+//     */
 //    @GetMapping("/online-count")
 //    @ResponseBody
 //    @Operation(summary = "在线人数统计", description = "获取当前在线用户数量")
@@ -96,6 +159,10 @@
 //        return Result.success(count);
 //    }
 //
+//    /**
+//     * 获取当前会话信息
+//     * 获取当前登录用户的 WebSocket 会话信息
+//     */
 //    @GetMapping("/my-session-info")
 //    @ResponseBody
 //    @Operation(summary = "获取当前会话信息", description = "获取当前登录用户的 WebSocket 会话信息")
@@ -105,30 +172,11 @@
 //        return Result.success(sessionInfo);
 //    }
 //
-//    @MessageMapping("/chat")
-//    @Operation(summary = "聊天消息", description = "处理聊天消息发送")
-//    public void sendChatMessage(@Payload ChatMessage chatMessage,
-//                                StompHeaderAccessor headerAccessor) {
-//        Long fromEmployeeId = LoginHelper.getLoginEmployeeId();
-//        log.info("员工 [{}] 发送聊天消息给员工 [{}]: {}",
-//                fromEmployeeId, chatMessage.getToUserId(), chatMessage.getContent());
+//    // ==================== 内部静态类 ====================
 //
-//        // 发送给指定用户
-//        webSocketSender.sendChatMessage(chatMessage.getToUserId(),
-//                new ChatMessage(fromEmployeeId, chatMessage.getContent()));
-//    }
-//
-//    @MessageMapping("/ack")
-//    @Operation(summary = "消息确认", description = "客户端确认已收到消息")
-//    public void acknowledgeMessage(@Payload AckMessage ackMessage,
-//                                   StompHeaderAccessor headerAccessor) {
-//        Long employeeId = LoginHelper.getLoginEmployeeId();
-//        log.info("员工 [{}] 确认消息：{}", employeeId, ackMessage.getMessageId());
-//
-//        // 可以在服务端记录消息已读状态
-//        webSocketManager.markMessageAsRead(ackMessage.getMessageId(), employeeId);
-//    }
-//
+//    /**
+//     * 消息包装类
+//     */
 //    @Data
 //    @Accessors(chain = true)
 //    public static class MessageWrapper {
@@ -143,30 +191,29 @@
 //        }
 //    }
 //
+//    /**
+//     * 消息请求类
+//     */
 //    @Data
 //    @Accessors(chain = true)
 //    public static class MessageRequest {
-//        private String type;
-//        private String content;
-//        private String destination;
+//        private String type;      // 消息类型：BROADCAST-广播，PRIVATE-私有
+//        private String content;   // 消息内容
+//        private String destination; // 目标地址
 //    }
 //
-//    @Data
-//    @Accessors(chain = true)
-//    public static class SessionInfo {
-//        private Long employeeId;
-//        private String sessionId;
-//        private Long lastActiveTime;
-//        private Integer connectionCount;
-//    }
 //
+//
+//    /**
+//     * 聊天消息类
+//     */
 //    @Data
 //    @Accessors(chain = true)
 //    public static class ChatMessage {
-//        private Long fromUserId;
-//        private Long toUserId;
-//        private String content;
-//        private Long timestamp;
+//        private Long fromUserId;    // 发送者 ID
+//        private Long toUserId;      // 接收者 ID
+//        private String content;     // 消息内容
+//        private Long timestamp;     // 时间戳
 //
 //        public ChatMessage() {}
 //
@@ -177,10 +224,13 @@
 //        }
 //    }
 //
+//    /**
+//     * 消息确认类
+//     */
 //    @Data
 //    @Accessors(chain = true)
 //    public static class AckMessage {
-//        private String messageId;
-//        private Boolean read;
+//        private String messageId;   // 消息 ID
+//        private Boolean read;       // 是否已读
 //    }
 //}
