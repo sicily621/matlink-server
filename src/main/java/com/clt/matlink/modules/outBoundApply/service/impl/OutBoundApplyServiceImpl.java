@@ -137,6 +137,7 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
         lqw.ge(form.getStartTime()!=null, OutBoundApply::getApplyTime, form.getStartTime());
         lqw.le(form.getEndTime()!=null, OutBoundApply::getApplyTime, form.getEndTime());
         lqw.eq( OutBoundApply::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        lqw.orderByDesc(OutBoundApply::getApplyTime);
         return lqw;
     }
     @Override

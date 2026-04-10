@@ -13,6 +13,7 @@ import com.clt.matlink.modules.base.common.domain.vo.StockFlowVO;
 import com.clt.matlink.modules.base.common.domain.vo.StockTrendVO;
 import com.clt.matlink.modules.base.common.mapper.StockRecordMapper;
 import com.clt.matlink.modules.base.common.service.StockRecordService;
+import com.clt.matlink.modules.instock.domain.entity.InStock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -85,6 +86,7 @@ public class StockRecordServiceImpl implements StockRecordService {
         lqw.ge(stockRecordForm.getStartTime()!=null, StockRecord::getHandleTime, stockRecordForm.getStartTime());
         lqw.le(stockRecordForm.getEndTime()!=null, StockRecord::getHandleTime, stockRecordForm.getEndTime());
         lqw.eq( StockRecord::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        lqw.orderByDesc(StockRecord::getHandleTime);
         return lqw;
     }
 

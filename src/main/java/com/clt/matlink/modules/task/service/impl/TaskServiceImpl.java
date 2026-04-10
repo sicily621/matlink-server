@@ -21,6 +21,7 @@ import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 import com.clt.matlink.modules.flow.service.AuditFlowRelationService;
+import com.clt.matlink.modules.outstock.domain.entity.OutStock;
 import com.clt.matlink.modules.system.employee.service.EmployeeService;
 import com.clt.matlink.modules.task.domain.entity.Task;
 import com.clt.matlink.modules.task.domain.entity.TaskDetail;
@@ -145,6 +146,7 @@ public class TaskServiceImpl implements TaskService {
         lqw.eq(form.getStatus()!=null, Task::getStatus, form.getStatus());
         lqw.eq(form.getAuditStatus()!=null, Task::getAuditStatus, form.getAuditStatus());
         lqw.eq( Task::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        lqw.orderByDesc(Task::getStartTime);
         return lqw;
     }
 

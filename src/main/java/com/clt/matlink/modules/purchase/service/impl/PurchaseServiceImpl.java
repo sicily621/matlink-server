@@ -164,6 +164,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         lqw.le(form.getEndTime()!=null, Purchase::getApplyDate, form.getEndTime());
         lqw.like(form.getBillNo()!=null, Purchase::getBillNo, form.getBillNo());
         lqw.eq( Purchase::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        lqw.orderByDesc(Purchase::getApplyDate);
         return lqw;
     }
     @Override

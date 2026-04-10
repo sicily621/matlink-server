@@ -182,6 +182,7 @@ public class InStockServiceImpl implements InStockService {
         lqw.ge(form.getStartTime()!=null, InStock::getInStockTime, form.getStartTime());
         lqw.le(form.getEndTime()!=null, InStock::getInStockTime, form.getEndTime());
         lqw.eq( InStock::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        lqw.orderByDesc(InStock::getInStockTime);
         return lqw;
     }
     @Override

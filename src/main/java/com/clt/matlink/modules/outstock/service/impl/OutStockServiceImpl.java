@@ -23,6 +23,7 @@ import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 import com.clt.matlink.modules.flow.service.AuditFlowRelationService;
 import com.clt.matlink.modules.instock.domain.entity.InStock;
 import com.clt.matlink.modules.instock.domain.form.InStockSaveParam;
+import com.clt.matlink.modules.outBoundApply.domain.entity.OutBoundApply;
 import com.clt.matlink.modules.outstock.domain.entity.OutStock;
 import com.clt.matlink.modules.outstock.domain.form.OutStockForm;
 import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
@@ -186,6 +187,7 @@ public class OutStockServiceImpl implements OutStockService {
         lqw.ge(form.getStartTime()!=null, OutStock::getOutStockTime, form.getStartTime());
         lqw.le(form.getEndTime()!=null, OutStock::getOutStockTime, form.getEndTime());
         lqw.eq( OutStock::getDelFlag, DelFlagEnum.NORMAL.getValue());
+        lqw.orderByDesc(OutStock::getOutStockTime);
         return lqw;
     }
     @Override
