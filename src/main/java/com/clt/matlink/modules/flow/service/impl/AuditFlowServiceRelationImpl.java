@@ -89,7 +89,7 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
         return auditFlowRelationMapper.selectList(lqw);
     }
     /*
-    * 当前用户能审批的关联单
+    * 当前用户能审批的审批单
     * */
     @Override
     public List<AuditFlowRelation> listAuditBeingByCurrentUser(AuditFlowRelationCurrentUserQuery auditFlowRelationCurrentUserQuery) {
@@ -240,7 +240,7 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
         return materialAuditRelationGenerateResult;
     }
     /*
-    * 处理审批步骤、流程
+    * 处理审批单及审批记录
     * */
 
     @Override
@@ -275,7 +275,7 @@ public class AuditFlowServiceRelationImpl implements AuditFlowRelationService {
             throw new ServiceException("当前审批单已审批结束");
         }
 
-        //查找状态是审批中，当且审批层级的审批记录
+        //查找状态是审批中，当前审批层级的审批记录
         AuditFlowDetailRelationForm auditFlowDetailRelationForm = new AuditFlowDetailRelationForm();
         auditFlowDetailRelationForm.setFlowId(auditFlowRelation.getId());
         auditFlowDetailRelationForm.setLevel(auditFlowRelation.getCurrentAuditLevel());
