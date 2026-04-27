@@ -7,7 +7,6 @@ import com.clt.matlink.modules.instock.domain.entity.InStock;
 import com.clt.matlink.modules.instock.domain.form.InStockForm;
 import com.clt.matlink.modules.instock.domain.form.InStockSaveParam;
 import com.clt.matlink.modules.instock.domain.vo.InStockVo;
-import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 
 import java.util.List;
 
@@ -28,4 +27,5 @@ public interface InStockService {
 
     InStock updateAuditStatus(MaterialAuditRelationParam generateParam);
     Boolean validateInStockNo(InStock inStock);
+    List<Long> getRelatedOrderList(List<Long> orderIds);
 }

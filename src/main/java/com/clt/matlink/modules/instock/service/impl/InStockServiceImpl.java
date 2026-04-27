@@ -1,6 +1,7 @@
 package com.clt.matlink.modules.instock.service.impl;
 
 import cn.hutool.core.collection.CollStreamUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,9 +12,9 @@ import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.common.security.LoginHelper;
 import com.clt.matlink.modules.base.common.domain.form.StockSaveParam;
 import com.clt.matlink.modules.base.common.service.StockDetailService;
+import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
 import com.clt.matlink.modules.enums.MateriaAuditStatusEnum;
 import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
-import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
@@ -27,7 +28,7 @@ import com.clt.matlink.modules.instock.domain.vo.InStockVo;
 import com.clt.matlink.modules.instock.mapper.InStockMapper;
 import com.clt.matlink.modules.instock.service.InStockDetailService;
 import com.clt.matlink.modules.instock.service.InStockService;
-import com.clt.matlink.modules.purchase.domain.entity.Purchase;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -200,5 +201,16 @@ public class InStockServiceImpl implements InStockService {
         }
         long count = inStockMapper.selectCount(lqw);
         return count == 0;
+    }
+    @Override
+    public List<Long> getRelatedOrderList(List<Long> orderIds){
+        if(CollUtil.isEmpty(orderIds)){
+            return Lists.newArrayList();
+        }
+        LambdaQueryWrapper<InStock> lqw = Wrappers.lambdaQuery();
+        lqw.in(InStock::getOriginOrderId, orderIds);
+        List<InStock> inStocks = inStockMapper.selectList(lqw);
+        List<Long> relatedOrderIds = CollStreamUtil.toList(inStocks, InStock::getOriginOrderId);
+        return relatedOrderIds;
     }
 }

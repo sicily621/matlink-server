@@ -3,15 +3,12 @@ package com.clt.matlink.modules.instock.controller;
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.domain.vo.Result;
-import com.clt.matlink.modules.base.common.domain.vo.MaterialVO;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.instock.domain.entity.InStock;
 import com.clt.matlink.modules.instock.domain.form.InStockForm;
 import com.clt.matlink.modules.instock.domain.form.InStockSaveParam;
 import com.clt.matlink.modules.instock.domain.vo.InStockVo;
 import com.clt.matlink.modules.instock.service.InStockService;
-import com.clt.matlink.modules.purchase.domain.entity.Purchase;
-import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -104,5 +101,12 @@ public class InStockController {
     @PostMapping("/validateInStockNo")
     public Result<Boolean> validateInStockNo(@RequestBody InStock inStock){
         return Result.success(inStockService.validateInStockNo(inStock));
+    }
+    /**
+     * 查询关联源单列表
+     */
+    @PostMapping("/getRelatedOrderList")
+    public Result<List<Long>> getRelatedOrderList(@RequestBody List<Long> orderIds){
+        return Result.success(inStockService.getRelatedOrderList(orderIds));
     }
 }

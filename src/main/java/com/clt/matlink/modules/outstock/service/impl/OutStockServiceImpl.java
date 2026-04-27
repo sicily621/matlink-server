@@ -1,6 +1,7 @@
 package com.clt.matlink.modules.outstock.service.impl;
 
 import cn.hutool.core.collection.CollStreamUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,7 +10,6 @@ import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.common.security.LoginHelper;
-import com.clt.matlink.modules.base.common.domain.entity.Stock;
 import com.clt.matlink.modules.base.common.domain.form.StockSaveParam;
 import com.clt.matlink.modules.base.common.service.StockDetailService;
 import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
@@ -21,9 +21,6 @@ import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 import com.clt.matlink.modules.flow.service.AuditFlowRelationService;
-import com.clt.matlink.modules.instock.domain.entity.InStock;
-import com.clt.matlink.modules.instock.domain.form.InStockSaveParam;
-import com.clt.matlink.modules.outBoundApply.domain.entity.OutBoundApply;
 import com.clt.matlink.modules.outstock.domain.entity.OutStock;
 import com.clt.matlink.modules.outstock.domain.form.OutStockForm;
 import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
@@ -31,7 +28,7 @@ import com.clt.matlink.modules.outstock.domain.vo.OutStockVo;
 import com.clt.matlink.modules.outstock.mapper.OutStockMapper;
 import com.clt.matlink.modules.outstock.service.OutStockDetailService;
 import com.clt.matlink.modules.outstock.service.OutStockService;
-import com.clt.matlink.modules.purchase.domain.entity.Purchase;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -205,5 +202,16 @@ public class OutStockServiceImpl implements OutStockService {
         }
         long count = outStockMapper.selectCount(lqw);
         return count == 0;
+    }
+    @Override
+    public List<Long> getRelatedOrderList(List<Long> orderIds){
+        if(CollUtil.isEmpty(orderIds)){
+            return Lists.newArrayList();
+        }
+        LambdaQueryWrapper<OutStock> lqw = Wrappers.lambdaQuery();
+        lqw.in(OutStock::getOriginOrderId, orderIds);
+        List<OutStock> outStocks = outStockMapper.selectList(lqw);
+        List<Long> relatedOrderIds = CollStreamUtil.toList(outStocks, OutStock::getOriginOrderId);
+        return relatedOrderIds;
     }
 }

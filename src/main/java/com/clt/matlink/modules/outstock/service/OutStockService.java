@@ -2,9 +2,7 @@ package com.clt.matlink.modules.outstock.service;
 
 import com.clt.matlink.common.domain.form.PageQuery;
 import com.clt.matlink.common.domain.vo.PageInfo;
-import com.clt.matlink.modules.base.common.domain.entity.Stock;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
-import com.clt.matlink.modules.instock.domain.entity.InStock;
 import com.clt.matlink.modules.outstock.domain.entity.OutStock;
 import com.clt.matlink.modules.outstock.domain.form.OutStockForm;
 import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
@@ -28,4 +26,5 @@ public interface OutStockService {
     List<OutStock> batchSave(List<OutStock> auditFlowDetails);
     OutStock updateAuditStatus(MaterialAuditRelationParam generateParam);
     Boolean validateOutStockNo(OutStock outStock);
+    List<Long> getRelatedOrderList(List<Long> orderIds);
 }

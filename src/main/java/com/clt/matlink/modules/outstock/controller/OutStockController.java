@@ -103,4 +103,11 @@ public class OutStockController {
     public Result<Boolean> validateOutStockNo(@RequestBody OutStock outStock){
         return Result.success(outStockService.validateOutStockNo(outStock));
     }
+    /**
+     * 查询关联源单列表
+     */
+    @PostMapping("/getRelatedOrderList")
+    public Result<List<Long>> getRelatedOrderList(@RequestBody List<Long> orderIds){
+        return Result.success(outStockService.getRelatedOrderList(orderIds));
+    }
 }

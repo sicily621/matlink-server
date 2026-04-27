@@ -9,24 +9,22 @@ import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.common.security.LoginHelper;
-import com.clt.matlink.modules.enums.MateriaAuditStatusEnum;
-import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
 import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
+import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 import com.clt.matlink.modules.flow.service.AuditFlowRelationService;
-import com.clt.matlink.modules.outstock.domain.entity.OutStock;
-import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
+import com.clt.matlink.modules.instock.service.InStockService;
+import com.clt.matlink.modules.outstock.service.OutStockService;
 import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import com.clt.matlink.modules.purchase.domain.form.PurchaseForm;
 import com.clt.matlink.modules.purchase.domain.form.PurchaseSaveParam;
 import com.clt.matlink.modules.purchase.domain.vo.PurchaseVo;
 import com.clt.matlink.modules.purchase.mapper.PurchaseMapper;
 import com.clt.matlink.modules.purchase.service.PurchaseService;
-import com.clt.matlink.modules.system.employee.domain.entity.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +36,10 @@ public class PurchaseServiceImpl implements PurchaseService {
     private PurchaseMapper purchaseMapper;
     @Autowired
     private AuditFlowRelationService auditFlowRelationService;
+    @Autowired
+    private InStockService inStockService;
+    @Autowired
+    private OutStockService outStockService;
     @Override
     public Purchase save(Purchase purchase) {
         int flag = 0;
@@ -109,12 +111,23 @@ public class PurchaseServiceImpl implements PurchaseService {
         flowRelationCurrentUserQuery.setStockId(form.getStockId());
         //当前用户能审批的关联单Id列表
         List<Long> beingOrderIds = auditFlowRelationService.listAuditBeingOrderIdsByCurrentUser(flowRelationCurrentUserQuery);
+        //获取出入库关联单列表
+        List<Long> orderIds = CollStreamUtil.toList(list, Purchase::getId);
+        List<Long> relatedInStockOrderIds = inStockService.getRelatedOrderList(orderIds);
+        List<Long> relatedOutStockOrderIds = outStockService.getRelatedOrderList(orderIds);
+
         for (PurchaseVo purchaseVo : list) {
             if(beingOrderIds.contains(purchaseVo.getId())){
                 purchaseVo.setHasAuditAuth(true);//当前登陆人有待审批
             }
             if (purchaseVo.getApplyUserId().equals(userId)) {
                 purchaseVo.setHasPurchaseAuth(true);//当前登陆人有采购权限
+            }
+            if(relatedInStockOrderIds.contains(purchaseVo.getId())){
+                purchaseVo.setRelatedInStock(true);//是否关联入库单
+            }
+            if(relatedOutStockOrderIds.contains(purchaseVo.getId())){
+                purchaseVo.setRelatedOutStock(true);//是否关联出库单
             }
 
         }

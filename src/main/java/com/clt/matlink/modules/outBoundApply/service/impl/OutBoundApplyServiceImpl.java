@@ -9,24 +9,22 @@ import com.clt.matlink.common.domain.vo.PageInfo;
 import com.clt.matlink.common.enums.DelFlagEnum;
 import com.clt.matlink.common.exception.ServiceException;
 import com.clt.matlink.common.security.LoginHelper;
-import com.clt.matlink.modules.enums.MateriaAuditStatusEnum;
-import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
 import com.clt.matlink.modules.enums.MateriaAuditResourceTypeEnum;
+import com.clt.matlink.modules.flow.domain.entity.AuditFlowRelation;
 import com.clt.matlink.modules.flow.domain.form.AuditFlowRelationCurrentUserQuery;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationGenerateParam;
 import com.clt.matlink.modules.flow.domain.form.MaterialAuditRelationParam;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationGenerateResult;
 import com.clt.matlink.modules.flow.domain.vo.MaterialAuditRelationResult;
 import com.clt.matlink.modules.flow.service.AuditFlowRelationService;
+import com.clt.matlink.modules.instock.service.InStockService;
 import com.clt.matlink.modules.outBoundApply.domain.entity.OutBoundApply;
 import com.clt.matlink.modules.outBoundApply.domain.form.OutBoundApplyForm;
 import com.clt.matlink.modules.outBoundApply.domain.form.OutBoundApplySaveForm;
 import com.clt.matlink.modules.outBoundApply.domain.vo.OutBoundApplyVo;
 import com.clt.matlink.modules.outBoundApply.mapper.OutBoundApplyMapper;
 import com.clt.matlink.modules.outBoundApply.service.OutBoundApplyService;
-import com.clt.matlink.modules.outstock.domain.entity.OutStock;
-import com.clt.matlink.modules.outstock.domain.form.OutStockSaveParam;
-import com.clt.matlink.modules.purchase.domain.entity.Purchase;
+import com.clt.matlink.modules.outstock.service.OutStockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +37,10 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
     private OutBoundApplyMapper outBoundApplyMapper;
     @Autowired
     private AuditFlowRelationService auditFlowRelationService;
+    @Autowired
+    private OutStockService outStockService;
+    @Autowired
+    private InStockService inStockService;
     @Override
     @Transactional(rollbackFor = Exception.class)
     public OutBoundApply save(OutBoundApply outBoundApply) {
@@ -108,12 +110,22 @@ public class OutBoundApplyServiceImpl implements OutBoundApplyService {
         flowRelationCurrentUserQuery.setType(MateriaAuditResourceTypeEnum.MATERIAL_OUTBOUND.getValue());
         flowRelationCurrentUserQuery.setStockId(form.getStockId());
         List<Long> beingOrderIds = auditFlowRelationService.listAuditBeingOrderIdsByCurrentUser(flowRelationCurrentUserQuery);
+        //获取出入库关联单列表
+        List<Long> orderIds = CollStreamUtil.toList(list, OutBoundApply::getId);
+        List<Long> relatedInStockOrderIds = inStockService.getRelatedOrderList(orderIds);
+        List<Long> relatedOutStockOrderIds = outStockService.getRelatedOrderList(orderIds);
         for (OutBoundApplyVo outBoundApplyVo : list) {
             if(beingOrderIds.contains(outBoundApplyVo.getId())){
                 outBoundApplyVo.setHasAuditAuth(true);//当前登陆人有待审批
             }
             if (outBoundApplyVo.getApplyUserId().equals(userId)) {
                 outBoundApplyVo.setHasApplyAuth(true);//当前登陆人有领用权限
+            }
+            if(relatedInStockOrderIds.contains(outBoundApplyVo.getId())){
+                outBoundApplyVo.setRelatedInStock(true);//是否关联入库单
+            }
+            if(relatedOutStockOrderIds.contains(outBoundApplyVo.getId())){
+                outBoundApplyVo.setRelatedOutStock(true);//是否关联出库单
             }
         }
         return tableDataInfo;
