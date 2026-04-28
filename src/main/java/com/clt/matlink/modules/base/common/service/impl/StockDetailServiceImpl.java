@@ -150,7 +150,8 @@ public class StockDetailServiceImpl implements StockDetailService {
             //采购退货 修改采购单状态为已退货
             if(outStock.getType().equals(2)){
                 Long resourceId = outStock.getOriginOrderId();
-                Purchase oldPurchase = purchaseService.getById(resourceId);
+                InStock oldInStock = inStockService.getById(resourceId);
+                Purchase oldPurchase = purchaseService.getById(oldInStock.getOriginOrderId());
                 oldPurchase.setStatus(PurchasingStatusEnum.RETURNED.getStatus());
                 purchaseService.save(oldPurchase);
             }

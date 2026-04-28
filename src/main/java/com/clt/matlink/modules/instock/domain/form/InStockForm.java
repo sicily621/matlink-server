@@ -15,7 +15,7 @@ public class InStockForm extends PageQuery {
     private Date startTime;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endTime;
-
+    private Integer type;
     private Long inStockUserId;
     private Long createUserId;
 }

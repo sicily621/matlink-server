@@ -28,6 +28,8 @@ import com.clt.matlink.modules.instock.domain.vo.InStockVo;
 import com.clt.matlink.modules.instock.mapper.InStockMapper;
 import com.clt.matlink.modules.instock.service.InStockDetailService;
 import com.clt.matlink.modules.instock.service.InStockService;
+import com.clt.matlink.modules.outstock.service.OutStockService;
+import com.clt.matlink.modules.purchase.domain.entity.Purchase;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,8 @@ public class InStockServiceImpl implements InStockService {
     private AuditFlowRelationService auditFlowRelationService;
     @Autowired
     private StockDetailService stockDetailService;
+    @Autowired
+    private OutStockService outStockService;
     @Override
     public InStock save(InStockSaveParam inStock) {
         int flag = 0;
@@ -120,12 +124,19 @@ public class InStockServiceImpl implements InStockService {
         flowRelationCurrentUserQuery.setType(MateriaAuditResourceTypeEnum.MATERIAL_IN_STOCK.getValue());
         flowRelationCurrentUserQuery.setStockId(form.getStockId());
         List<Long> beingOrderIds = auditFlowRelationService.listAuditBeingOrderIdsByCurrentUser(flowRelationCurrentUserQuery);
+
+        //获取出入库关联单列表
+        List<Long> orderIds = CollStreamUtil.toList(list, InStockVo::getId);
+        List<Long> relatedOutStockOrderIds = outStockService.getRelatedOrderList(orderIds);
         for (InStockVo inStockVo : list) {
             if(beingOrderIds.contains(inStockVo.getId())){
                 inStockVo.setHasAuditAuth(true);//当前登陆人有待审批
             }
             if (inStockVo.getInStockUserId().equals(userId)) {
                 inStockVo.setHasInStockAuth(true);//当前登陆人有入库权限
+            }
+            if(relatedOutStockOrderIds.contains(inStockVo.getId())){
+                inStockVo.setRelatedOutStock(true);//是否关联出库单
             }
             BigDecimal total = inStockDetailService.findInStockAmount(inStockVo.getId());
             inStockVo.setInStockAmount(total);
@@ -182,6 +193,7 @@ public class InStockServiceImpl implements InStockService {
         lqw.eq(form.getAuditStatus()!=null, InStock::getAuditStatus, form.getAuditStatus());
         lqw.ge(form.getStartTime()!=null, InStock::getInStockTime, form.getStartTime());
         lqw.le(form.getEndTime()!=null, InStock::getInStockTime, form.getEndTime());
+        lqw.eq(form.getType()!=null, InStock::getType, form.getType());
         lqw.eq( InStock::getDelFlag, DelFlagEnum.NORMAL.getValue());
         lqw.orderByDesc(InStock::getInStockTime);
         return lqw;

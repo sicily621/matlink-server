@@ -14,4 +14,6 @@ public class InStockVo extends InStock {
     private Boolean hasAuditAuth = false;
     @Schema(description = "当前登陆人是否有权限入库")
     private Boolean hasInStockAuth = false;
+    @Schema(description = "是否关联出库单")
+    private Boolean relatedOutStock = false;
 }
